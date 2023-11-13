@@ -1,0 +1,6 @@
+# Created by Kenney (www.kenney.nl)
+
+newmtl ship_1
+Kd 1 1 1
+map_Kd Textures/ship_1.png
+
