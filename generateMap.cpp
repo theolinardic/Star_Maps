@@ -1,4 +1,5 @@
 #include <generateMap.h>
+#include <loadFiles.h>
 
 // Function to initialize the GLFW window and return it.
 GLFWwindow* initialize_glfw_window(void)
@@ -25,10 +26,14 @@ GLFWwindow* initialize_glfw_window(void)
 		glfwTerminate();
 		return NULL;
 	}
-
 	// Make 'star_maps_window' the active window in glfw.
 	glfwMakeContextCurrent(star_maps_window);
 
-	// Return the generated GLFW window.
+	// Use glad to load OpenGl.
+	gladLoadGL();
+	glViewport(0, 0, res_width, res_height);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	return star_maps_window;
 }

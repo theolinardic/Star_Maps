@@ -1,1 +1,1 @@
-{"res_x": 1280, "res_y": 720, "fullscreen": false, "graphics_preset": "high", "fps_cap": 0}
+{"res_width": 1280, "res_height": 720, "should_fullscreen": 0, "graphics_preset": 3, "fps_cap": 0}
