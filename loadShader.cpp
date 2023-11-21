@@ -1,35 +1,31 @@
 #include <loadShader.h>
 
+// Function to read in the text of the suppied shader file.
 GLchar* read_shader_text(const char* file_path)
 {
     // Open shader file and read in the content.
     FILE* shader_file;
-    errno_t error = fopen_s(&shader_file, file_path, "r");
-    if (error == '0')
+    errno_t error = fopen_s(&shader_file, file_path, "rb");
+    if (error == '0' || !shader_file)
     {
+        std::cout << "Error in opening shader: " << file_path << "." << std::endl;
         fclose(shader_file);
         return NULL;
     }
-    if (!shader_file)
-    {
-        std::cout << "Error in opening shader: " << file_path << "." << std::endl;
-        return NULL;
-    }
-
     // Find the length of the shader file and allocate mem to the shader char array.
     fseek(shader_file, 0, SEEK_END);
-    long file_len = ftell(shader_file);
-    fseek(shader_file, 0, SEEK_SET);
+    long int file_len = ftell(shader_file);
+    rewind(shader_file);
     GLchar* shader_content = (GLchar*)malloc(file_len + 1);
-
+    
     // Read the contents of the shader file into the allocated memory, remove the empty char at the end, and close the file.
     fread(shader_content, 1, file_len, shader_file);
-    shader_content[file_len] = 0;
+    shader_content[file_len] = '\0';
     fclose(shader_file);
 
     return shader_content;
 }
-// Function to load vertex and fragment shaders from a file:
+// Function to load vertex and fragment shaders from a file.
 GLuint load_shader(const char* vertex_file_path, const char* frag_file_path)
 {
     GLchar* vertex_shader_content = read_shader_text(vertex_file_path);
@@ -56,7 +52,5 @@ GLuint load_shader(const char* vertex_file_path, const char* frag_file_path)
     // Delete the vertex and fragment shaders as they are in the shader pgrogram and do not need to be kept seperate.
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
-
     return shader_program;
 }
-

@@ -1,1 +1,43 @@
-{"galaxy_name": "Developer", "money": -99999999999999, "current_sol": 0, "current_time": "00H_00M_00S", "total_time_played": "00H_00M_00S", "difficulty": "dev", "status_1_percent": 100.0, "status_2_percent": 100.0, "status_3_percent": 100.0, "entities": {"stations": [], "planets": []}}
+{
+    "current_sol": 0,
+    "current_time": "05H_05M_16.589310S",
+    "difficulty": "easy",
+    "galaxy_name": "MyGalaxy",
+    "money": 10002111660032.0,
+    "status_1_percent": 100.0,
+    "status_2_percent": 100.0,
+    "status_3_percent": 100.0,
+    "total_time_played": "02H_08M_12.238135S",
+	"entities": [
+        {
+            "obj_type": 0,
+            "texture": 0,
+            "parent": -1,
+            "location": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+            }
+        },
+        {
+            "obj_type": 1,
+            "texture": 1,
+            "parent": 1,
+            "location": {
+                "X": -15.2,
+                "Y": 30.8,
+                "Z": 12.0
+            }
+        },
+ 	{
+            "obj_type": 2,
+            "texture": 2,
+            "parent": 2,
+            "location": {
+                "X": 0.0,
+                "Y": 0.0,
+                "Z": 0.0
+            }
+        }
+    ]
+}

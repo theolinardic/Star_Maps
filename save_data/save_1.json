@@ -1,1 +1,11 @@
-{"galaxy_name": "Test1", "money": 100000000, "current_sol": 0, "current_time": "00H_00M_00S", "total_time_played": "00H_00M_00S", "difficulty": "easy", "status_1_percent": 100.0, "status_2_percent": 100.0, "status_3_percent": 100.0, "entities": {"stations": [], "planets": []}}
+{
+    "current_sol": 325,
+    "current_time": "02H_20M_44.621147S",
+    "difficulty": "medium",
+    "galaxy_name": "Shambler Galaxy",
+    "money": -954240000.0,
+    "status_1_percent": 66.5,
+    "status_2_percent": 10.600000381469727,
+    "status_3_percent": 80.0,
+    "total_time_played": "58H_05M_28.621145S"
+}

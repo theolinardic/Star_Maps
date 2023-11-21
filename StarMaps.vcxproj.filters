@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Shader Files">
+      <UniqueIdentifier>{e7b7355f-f159-458a-a8b9-b47664a78215}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Skybox">
+      <UniqueIdentifier>{d9016cca-00ab-4052-9196-59e59e2a3cab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Default">
+      <UniqueIdentifier>{3e4fb2a2-9939-4115-baae-d0b2b2642fd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{ff55b5bb-3e0d-43b2-8d27-1f02696b83c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{00cdb612-593b-4dab-b2a6-8945b87b553c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Planets">
+      <UniqueIdentifier>{cf59cd60-74a8-4f09-95ed-461dc446d209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Sun">
+      <UniqueIdentifier>{f5aeceea-caef-4955-96dd-d745d721aafb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Ships">
+      <UniqueIdentifier>{695ae986-a3b1-40f6-83cb-7ce163f15d3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shader Files\Orbit Rings">
+      <UniqueIdentifier>{9f643032-ac08-46e4-acbd-c6b5e09ec06d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loadShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loadObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_tables.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="generateMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_logic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\player.h\Header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_impl_glfw.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_impl_opengl3.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui_internal.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_rectpack.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_textedit.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imstb_truetype.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imconfig.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="External Libraries\imgui\imgui.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\generateMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loadObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loadShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\game_logic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\skybox\frag.glsl">
+      <Filter>Source Files\Shader Files\Skybox</Filter>
+    </None>
+    <None Include="shaders\skybox\vert.glsl">
+      <Filter>Source Files\Shader Files\Skybox</Filter>
+    </None>
+    <None Include="shaders\default\frag.glsl">
+      <Filter>Source Files\Shader Files\Default</Filter>
+    </None>
+    <None Include="shaders\default\vert.glsl">
+      <Filter>Source Files\Shader Files\Default</Filter>
+    </None>
+    <None Include="shaders\planets\frag.glsl">
+      <Filter>Source Files\Shader Files\Planets</Filter>
+    </None>
+    <None Include="shaders\planets\vert.glsl">
+      <Filter>Source Files\Shader Files\Planets</Filter>
+    </None>
+    <None Include="shaders\Sun\frag.glsl">
+      <Filter>Source Files\Shader Files\Sun</Filter>
+    </None>
+    <None Include="shaders\Sun\vert.glsl">
+      <Filter>Source Files\Shader Files\Sun</Filter>
+    </None>
+    <None Include="shaders\ships\frag.glsl">
+      <Filter>Source Files\Shader Files\Ships</Filter>
+    </None>
+    <None Include="shaders\ships\vert.glsl">
+      <Filter>Source Files\Shader Files\Ships</Filter>
+    </None>
+    <None Include="shaders\orbit_rings\frag.glsl">
+      <Filter>Source Files\Shader Files\Orbit Rings</Filter>
+    </None>
+    <None Include="shaders\orbit_rings\vert.glsl">
+      <Filter>Source Files\Shader Files\Orbit Rings</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\textures\planets\planet_test_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
