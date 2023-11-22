@@ -13,8 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <SOIL2/SOIL2.h>
 #include <json.hpp>
-#include <renderer.h>
-#include <rings.h>
+#include <objects.h>
 #include <player.h>
 
 class star_maps_game
@@ -56,4 +55,5 @@ public:
 	void close_game();
 	void despawn_all_entities();
 	void check_click(glm::vec3 camera_position, glm::vec3 mouse_pos);
+	void switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch);
 };

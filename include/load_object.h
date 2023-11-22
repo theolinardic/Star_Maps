@@ -39,4 +39,9 @@ public:
 int load_object_file(char* file_name, std::vector <glm::vec3>& v_out,
 	std::vector <glm::vec2>& uv_out, std::vector <glm::vec3>& n_out);
 
+
+GLchar* read_shader_text(const char* file_path);
+GLuint load_shader(const char* vertex_file, const char* frag_file);
+
+
 #endif

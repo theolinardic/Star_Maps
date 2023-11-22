@@ -12,7 +12,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <SOIL2/SOIL2.h>
-#include <loadShader.h>
+#include <load_object.h>
 #include <json.hpp>
 #include <random>
 #include <assimp/Importer.hpp>      // C++ importer interface
@@ -56,14 +56,12 @@ public:
     float get_radius();
 };
 
-struct Vertex
-{
-    glm::vec3 pos;
-    glm::vec2 texCoord;
-    glm::vec3 normal;
+const float PI = 3.14159265359f;
 
-    Vertex(glm::vec3 pos, glm::vec2 texCoord = glm::vec2(0, 0), glm::vec3 normal = glm::vec3(0, 0, 0)) :
-        pos(pos),
-        texCoord(texCoord),
-        normal(normal) {}
+class rings
+{
+public:
+    GLuint shader, VAO, VBO;
+    rings();
+    void render();
 };

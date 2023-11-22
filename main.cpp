@@ -10,15 +10,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <json.hpp>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 // Below  are original source files for Star Maps:
-#include <renderer.h>
+#include <objects.h>
 #include <generateMap.h>
 #include <player.h>
 #include <game_logic.h>
-#include <rings.h>
 
 
 int main()
@@ -32,11 +28,11 @@ int main()
 	skybox SB = skybox();
 
 	// Set up camera variables:
-	glm::vec3 camera_position = glm::vec3(0.0f, 1200.0f, 3.0f);
-	glm::vec3 camera_front = glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 camera_position = glm::vec3(642.0f, 692.0f, -1220.0f);
+	glm::vec3 camera_front = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
-	float camera_yaw = -90.0f;
-	float camera_pitch = -90.0f;
+	float camera_yaw = 115.0f;
+	float camera_pitch = -35.0f;
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	float launch_time = glfwGetTime();
@@ -78,7 +74,6 @@ int main()
 		camera_front = glm::normalize(front);
 
 		SB.render(camera_position, camera_front);
-		//TestPlanet2.Render(camera_position, camera_front, star_maps.game_speed_multiplier);
 		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
 		
 		float time_open_sec = glfwGetTime() - launch_time;
@@ -97,6 +92,14 @@ int main()
 		ImGui::Text("Camera Rot Y: %f", front.y);
 		ImGui::Text("Camera Rot Y: %f", front.z);
 		ImGui::Checkbox("Paused", &star_maps.paused);
+		if (ImGui::Button("Camera Top"))
+		{
+			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 1);
+		}
+		if (ImGui::Button("Camera Side"))
+		{
+			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 0);
+		}
 		ImGui::End();
 		ImGui::Render();
 		if (show_debug)

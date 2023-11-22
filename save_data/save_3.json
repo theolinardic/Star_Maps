@@ -72,6 +72,26 @@
             "obj_type": 1,
             "parent": 1,
             "texture": 1
+        },
+	{
+            "location": {
+                "X": -76.0,
+                "Y": 154.0,
+                "Z": 60.0
+            },
+            "obj_type": 2,
+            "parent": 2,
+            "texture": 2
+        },
+	{
+            "location": {
+                "X": -76.0,
+                "Y": 154.0,
+                "Z": 60.0
+            },
+            "obj_type": 2,
+            "parent": 4,
+            "texture": 2
         }
     ],
     "galaxy_name": "test",

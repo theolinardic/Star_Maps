@@ -283,6 +283,25 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	//this->entitiys[new_entity_id].LoadObject();
 }
 
+void star_maps_game::switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch)
+{
+	// 1 = top, 0 = side
+	if (view_switch == 0)
+	{
+		camera_position = glm::vec3(642.0f, 692.0f, -1220.0f);
+		camera_front = glm::vec3(0.0f, 1.0f, 0.0f);
+		camera_yaw = 115.0f;
+		camera_pitch = -35.0f;
+	}
+	else
+	{
+		camera_position = glm::vec3(0.0f, 1200.0f, 3.0f);
+		camera_front = glm::vec3(0.0f, -1.0f, 0.0f);
+		camera_yaw = -90.0f;
+		camera_pitch = -90.0f;
+	}
+}
+
 void star_maps_game::despawn_all_entities()
 {
 	for (game_object* obj : this->entitiys) {

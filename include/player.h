@@ -14,7 +14,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <json.hpp>
 #include <game_logic.h>
-#include <renderer.h>
+#include <objects.h>
 
 
 #define PLANET_NAME_JSON "assets/planet_names.json"

@@ -153,12 +153,10 @@
     <ClCompile Include="game_logic.cpp" />
     <ClCompile Include="generateMap.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="loadObject.cpp" />
-    <ClCompile Include="loadShader.cpp" />
+    <ClCompile Include="load_object.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="rings.cpp" />
+    <ClCompile Include="objects.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External Libraries\imgui\imconfig.h" />
@@ -173,12 +171,10 @@
     <ClInclude Include="include\game_logic.h" />
     <ClInclude Include="include\generateMap.h" />
     <ClInclude Include="include\json.hpp" />
-    <ClInclude Include="include\loadObject.h" />
-    <ClInclude Include="include\loadShader.h" />
+    <ClInclude Include="include\load_object.h" />
     <ClInclude Include="include\player.h" />
     <ClInclude Include="include\player.h\Header.h" />
-    <ClInclude Include="include\renderer.h" />
-    <ClInclude Include="include\rings.h" />
+    <ClInclude Include="include\objects.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\default\frag.glsl" />
