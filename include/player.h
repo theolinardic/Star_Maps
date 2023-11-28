@@ -23,7 +23,7 @@ extern float movement_speed;
 extern float sensitivity;
 extern bool show_debug;
 
-glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch);
+glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys);
 nlohmann::json get_settings();
 void change_setting(const std::string setting, const nlohmann::json new_value);
 void reset_settings();

@@ -215,6 +215,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->orbit_radius = 0;
 		new_ent->orbit_speed = 0;
 		new_ent->size_adjust = 10;
+		new_ent->render_bb = true;
 		break;
 	case 1:
 		std::cout << "X " << new_entity_id << std::endl;
@@ -239,7 +240,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	}
 	switch (texture_id) {
 	case 0:
-		new_ent->LoadTexture("assets/textures/planets/planet_texture1.png");
+		new_ent->LoadTexture("assets/textures/planets/sun.jpg");
 		break;
 	case 1:
 		new_ent->LoadTexture("assets/textures/planets/earth.jpg");
@@ -323,6 +324,8 @@ void star_maps_game::entity_manager(const glm::vec3& cameraPosition, const glm::
 	}
 	for (game_object* obj : this->entitiys) {
 		obj->Render(cameraPosition, cameraFront, game_speed);
+		if (obj->render_bb)
+			obj->RenderBoundingBox();
 	}
 
 	if (this->entitiys.size() != 0)
@@ -330,15 +333,6 @@ void star_maps_game::entity_manager(const glm::vec3& cameraPosition, const glm::
 			
 }
 
-void star_maps_game::check_click(glm::vec3 camera_position, glm::vec3 mouse_pos)
-{
-	for (game_object* obj : this->entitiys)
-	{
-		bool isClicked = obj->IsMouseOnObject(camera_position, mouse_pos, obj->get_center(), obj->get_radius());
-		if (isClicked)
-			std::cout << obj->planet_entity_id << std::endl;
-	}
-}
 
 void star_maps_game::close_game()
 {

@@ -11,6 +11,7 @@ game_object::game_object()
     this->time_exist = 0.0;
     this->rotation_speed = 0.5;
     this->position = glm::vec3(0.0, 0.0, 0.0);
+    this->render_bb;
 }
 
 
@@ -88,11 +89,21 @@ void game_object::LoadObject(const char* objFilePath) {
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 
+    boundingBoxMin = glm::vec3(std::numeric_limits<float>::max());
+    boundingBoxMax = glm::vec3(-std::numeric_limits<float>::max());
+
+    for (unsigned int i = 0; i < verticesCopy.size(); i += 3) {
+        glm::vec3 vertex(verticesCopy[i], verticesCopy[i + 1], verticesCopy[i + 2]);
+        boundingBoxMin = glm::min(boundingBoxMin, vertex);
+        boundingBoxMax = glm::max(boundingBoxMax, vertex);
+    }
+
     this->indicesCount = indices.size();
     this->obj_verts = verticesCopy;
     // Debug print to check vertices and UVs alignment
     std::cout << "Number of Vertices: " << vertices.size() / 8 << std::endl;
     std::cout << "Number of Indices: " << indices.size() / 3 << std::endl;
+
 }
 
 void game_object::LoadTexture(const char* textureFilePath) {
@@ -122,18 +133,17 @@ void game_object::teleport(glm::vec3 new_pos)
     this->position = new_pos;
 }
 
-glm::vec3 game_object::get_center()
-{
+glm::vec3 game_object::get_center() {
     glm::vec3 center(0.0f);
-    unsigned int vertexCount = this->obj_verts.size() / 3;
+    unsigned int vertexCount = this->obj_verts.size() / 3; // Number of vertices, assuming 3 values per vertex
 
     for (unsigned int i = 0; i < this->obj_verts.size(); i += 3) {
         center.x += this->obj_verts[i];
         center.y += this->obj_verts[i + 1];
         center.z += this->obj_verts[i + 2];
-       // std::cout << "Sum: (" << center.x << ", " << center.y << ", " << center.z << ")" << std::endl;
     }
-    center.x /= static_cast<float>(vertexCount);
+
+    center.x /= static_cast<float>(vertexCount); // Divide by the number of vertices
     center.y /= static_cast<float>(vertexCount);
     center.z /= static_cast<float>(vertexCount);
     return center;
@@ -181,6 +191,10 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
         float orbitY = parentPlanetCenter4.y; // Assuming the orbit is on the same Y-level as the parent planet
         float orbitZ = parentPlanetCenter4.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
 
+        this->position.x = orbitX;
+        this->position.y = orbitY;
+        this->position.z = orbitZ;
+
         modelMatrix = glm::translate(modelMatrix, glm::vec3(orbitX, orbitY, orbitZ));
         modelMatrix = this->parent_planet->parent_mm * modelMatrix;
 
@@ -193,6 +207,10 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
         float orbitX = this->orbit_center.x + this->orbit_radius * cos(this->time_exist * this->orbit_speed);
         float orbitY = 0.0f;
         float orbitZ = this->orbit_center.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
+
+        this->position.x = orbitX;
+        this->position.y = orbitY;
+        this->position.z = orbitZ;
 
         modelMatrix = glm::translate(modelMatrix, glm::vec3(orbitX, orbitY, orbitZ));
 
@@ -218,31 +236,88 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
     glDrawElements(GL_TRIANGLES, this->indicesCount, GL_UNSIGNED_INT, 0);
 
     this->parent_mm = modelMatrix;
+
+    this->vm = viewMatrix;
+    this->pm = projectionMatrix;
+    this->mm = modelMatrix;
+
 }
 
-bool game_object::IsMouseOnObject(const glm::vec3& mouseRayOrigin, const glm::vec3& mouseRayDir, const glm::vec3& objectCenter, float objectRadius) {
-    // Calculate the vector from the mouse's ray origin to the object's center
-    glm::vec3 mouseToCenter = objectCenter - mouseRayOrigin;
-
-    // Project the mouse-to-center vector onto the mouse's ray direction to find the closest point on the ray to the sphere
-    float projection = glm::dot(mouseToCenter, mouseRayDir);
-    if (projection < 0) {
-        // The object is behind the ray
-        return false;
-    }
-
-    // Calculate the closest point on the ray to the sphere
-    glm::vec3 closestPoint = mouseRayOrigin + projection * mouseRayDir;
-
-    // Check if the closest point is within the sphere's radius
-    float distance = glm::distance(closestPoint, objectCenter);
-    return distance <= objectRadius;
-}
 
 void game_object::delete_object()
 {
     free(this);
 }
+
+void game_object::RenderBoundingBox() {
+    // Generate the bounding box vertices for a wireframe box
+    std::vector<GLfloat> boundingBoxVertices = {
+        // Bottom face
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
+
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
+
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
+
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
+
+        // Top face
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
+
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
+
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
+
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
+
+        // Side edges
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
+
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
+
+        boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
+        boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
+
+        boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
+        boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
+    };
+
+    // Generate VAO and VBO for the bounding box
+    GLuint bboxVAO, bboxVBO;
+    glGenVertexArrays(1, &bboxVAO);
+    glBindVertexArray(bboxVAO);
+
+    glGenBuffers(1, &bboxVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, bboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, boundingBoxVertices.size() * sizeof(GLfloat), &boundingBoxVertices[0], GL_STATIC_DRAW);
+
+    // Configure vertex attributes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Render the bounding box
+    glUseProgram(this->shader);  // Use the correct shader program
+
+    glBindVertexArray(bboxVAO);
+    glDrawArrays(GL_LINES, 0, boundingBoxVertices.size() / 3);
+
+    // Clean up
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &bboxVAO);
+    glDeleteBuffers(1, &bboxVBO);
+}
+
+
 
 rings::rings() {
     // Load shader, create VAO, VBO, and set up vertices for a single ring
@@ -301,4 +376,51 @@ void rings::render()
 
         glDrawArrays(GL_LINE_LOOP, 0, 360);
     }
+}
+
+arrow::arrow() {
+    // Load shader, create VAO, VBO, and set up vertices for a single ring
+    this->shader = load_shader("shaders/orbit_rings/vert.glsl", "shaders/orbit_rings/frag.glsl");
+    glUseProgram(this->shader);
+
+    // Generate VAO and VBO
+    glGenVertexArrays(1, &this->VAO);
+    glGenBuffers(1, &this->VBO);
+
+    // Bind VAO and VBO
+    glBindVertexArray(this->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+
+    GLfloat rayVertices[] = {
+        641.959,  691.955, -1219.92,
+        -3486.45, -3799.48, 6836.2
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rayVertices), rayVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void arrow::render()
+{
+    glBindVertexArray(this->VAO);
+    glLineWidth(1.0f);
+
+    // Update the arrow's position and orientation in the 3D space
+    glm::mat4 modelArrow = glm::mat4(1.0f);
+    // Translate the arrow to a specific position in the scene
+    modelArrow = glm::translate(modelArrow, glm::vec3(0.0f, 0.0f, 0.0f));
+    // Apply a rotation if needed
+    modelArrow = glm::rotate(modelArrow, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // Scale the arrow if necessary
+    modelArrow = glm::scale(modelArrow, glm::vec3(1.0f, 1.0f, 1.0f));
+
+    // Set the model matrix in the shader
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(modelArrow));
+
+    // Draw the arrow as a line from (0, 0, 0) to (100, 100, 100) in the transformed space
+    glDrawArrays(GL_LINES, 0, 2);
 }

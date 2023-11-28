@@ -7,12 +7,8 @@ bool show_debug = true;
 
 // Function to read player input and process it appropriatley.
 // Note: will not be called when interacting with debug menu.
-glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch)
+glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys)
 {
-	glm::mat4 viewMatrix = glm::lookAt(camera_position, camera_front, glm::vec3(0,1,0));
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f/1080.0f, 0.1f, 10000.0f);
-	glm::mat4 inverseProjectionMatrix = glm::inverse(projectionMatrix);
-
 	if (glfwGetKey(star_maps_window, GLFW_KEY_W) == GLFW_PRESS) {
 		camera_position += movement_speed * camera_front;  // Move forward
 	}
@@ -42,6 +38,20 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 	if (glfwGetKey(star_maps_window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		camera_pitch -= sensitivity;
 	}
+	if (glfwGetKey(star_maps_window, GLFW_KEY_1) == GLFW_PRESS) {
+		// Find the currently rendered bounding box and toggle it off
+		for (game_object* obj : entitiys) {
+			if (obj->render_bb) {
+				obj->render_bb = false;
+				break;
+			}
+		}
+
+		// Move to the next object and toggle its bounding box on
+		static size_t currentEntityIndex = 0; // Keep track of the current entity
+		currentEntityIndex = (currentEntityIndex + 1) % entitiys.size();
+		entitiys[currentEntityIndex]->render_bb = true;
+	}
 
 	// Clamp the camera pitch to avoid flipping upside down
 	if (camera_pitch > 89.0f) {
@@ -51,37 +61,76 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 		camera_pitch = -89.0f;
 	}
 
+	glm::mat4 viewMatrix = glm::lookAt(camera_position, camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+	glm::mat4 inverseProjectionMatrix = glm::inverse(projectionMatrix);
+	glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
+
+	glm::vec3 out_direction = glm::vec3(-99999.0f);
+
 	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(star_maps_window, &xpos, &ypos);
-	//	std::cout << xpos << " " << ypos << std::endl;
-
 		double mouseX, mouseY;
 		glfwGetCursorPos(star_maps_window, &mouseX, &mouseY);
 
 		// Get window size
-		int width, height;
-		glfwGetWindowSize(star_maps_window, &width, &height);
+		int windowWidth, windowHeight;
+		glfwGetWindowSize(star_maps_window, &windowWidth, &windowHeight);
 
 		// Convert mouse coordinates to NDC (Normalized Device Coordinates)
-		float ndcX = (2.0f * mouseX) / width - 1.0f;
-		float ndcY = 1.0f - (2.0f * mouseY) / height;
+		float ndcX = (2.0f * mouseX) / windowWidth - 1.0f;
+		float ndcY = 1.0f - (2.0f * mouseY) / windowHeight;
 
-		// Construct the ray in screen space
-		glm::vec4 ray = glm::vec4(ndcX, ndcY, -1.0f, 1.0f);
+		glm::vec4 rayStart_NDC = glm::vec4((2.0f * mouseX) / windowWidth - 1.0f, 1.0f - (2.0f * mouseY) / windowHeight, -1.0f, 1.0f);
+		glm::vec4 rayEnd_NDC = glm::vec4((2.0f * mouseX) / windowWidth - 1.0f, 1.0f - (2.0f * mouseY) / windowHeight, 1.0f, 1.0f);
 
-		glm::vec4 rayEye = inverseProjectionMatrix * ray;
-		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f); // Z component should be forward
-		// Inverse of the view matrix
-		glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
+		glm::vec4 rayStart_world = inverseProjectionMatrix * rayStart_NDC;
+		rayStart_world /= rayStart_world.w;
 
-		// Transform ray from view space to world space
-		glm::vec4 rayWorld = inverseViewMatrix * rayEye;
-		glm::vec3 rayDirection = glm::normalize(glm::vec3(rayWorld));
+		glm::vec4 rayEnd_world = inverseProjectionMatrix * rayEnd_NDC;
+		rayEnd_world /= rayEnd_world.w;
 
-		return rayDirection;
+		rayStart_world = inverseViewMatrix * rayStart_world;
+		rayEnd_world = inverseViewMatrix * rayEnd_world;
+
+
+		// Calculate the direction of the ray
+		glm::vec3 rayDirection = glm::normalize(glm::vec3(rayEnd_world - rayStart_world));
+
+		// Loop through objects and their bounding boxes to check for intersection
+		for (game_object* obj : entitiys) {
+			glm::vec3 invDirection = 1.0f / rayDirection;
+
+			glm::vec3 bboxMin = obj->boundingBoxMin + obj->position;
+			glm::vec3 bboxMax = obj->boundingBoxMax + obj->position;
+
+		//	std::cout << obj->planet_entity_id << std::endl;
+		//	std::cout << bboxMin.x << " " << bboxMin.y << " " << bboxMin.z << " " << std::endl;
+		//	std::cout << bboxMax.x << " " << bboxMax.y << " " << bboxMax.z << " " << std::endl;
+		//	std::cout << obj->position.x << " " << obj->position.y << " " << obj->position.z << " " << std::endl;
+
+			glm::vec3 tMin = (bboxMin - glm::vec3(rayStart_world)) * invDirection;
+			glm::vec3 tMax = (bboxMax - glm::vec3(rayStart_world)) * invDirection;
+
+			glm::vec3 tEnter = glm::min(tMin, tMax);
+			glm::vec3 tExit = glm::max(tMin, tMax);
+
+			float tEnterMax = glm::max(glm::max(tEnter.x, tEnter.y), tEnter.z);
+			float tExitMin = glm::min(glm::min(tExit.x, tExit.y), tExit.z);
+
+			if (tEnterMax <= tExitMin && tExitMin >= 0.0f) {
+				std::cout << "Intersection with object " << obj->planet_entity_id << std::endl;
+				// Handle intersection here (e.g., select or interact with the object)
+				return obj->position; // Return the position of the clicked object
+			}
+		}
+
+	//	std::cout << "rayStart_NDC: (" << rayStart_NDC.x << ", " << rayStart_NDC.y << ", " << rayStart_NDC.z << ", " << rayStart_NDC.w << ")" << std::endl;
+		//std::cout << "rayEnd_NDC: (" << rayEnd_NDC.x << ", " << rayEnd_NDC.y << ", " << rayEnd_NDC.z << ", " << rayEnd_NDC.w << ")" << std::endl;
+	//	std::cout << "rayStart_world: (" << rayStart_world.x << ", " << rayStart_world.y << ", " << rayStart_world.z << ", " << rayStart_world.w << ")" << std::endl;
+	//	std::cout << "rayEnd_world: (" << rayEnd_world.x << ", " << rayEnd_world.y << ", " << rayEnd_world.z << ", " << rayEnd_world.w << ")" << std::endl;
 	}
+	return glm::vec3(-999999.0f);
 }
 
 

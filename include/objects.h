@@ -19,6 +19,7 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
+
 class game_object {
 private:
     int indicesCount;
@@ -52,8 +53,19 @@ public:
     void teleport(glm::vec3 new_pos);
     glm::vec3 get_center();
     glm::mat4 parent_mm;
-    bool IsMouseOnObject(const glm::vec3& mouseRayOrigin, const glm::vec3& mouseRayDir, const glm::vec3& objectCenter, float objectRadius);
+    bool IsMouseOnObject(const glm::vec3& rayDirection, const glm::vec3& cameraPosition, float objectRadius);
     float get_radius();
+
+    void RenderBoundingBox();
+
+    glm::vec3 boundingBoxMin;
+    glm::vec3 boundingBoxMax;
+
+    glm::mat4 vm;
+    glm::mat4 pm;
+    glm::mat4 mm;
+
+    bool render_bb;
 };
 
 const float PI = 3.14159265359f;
@@ -63,5 +75,13 @@ class rings
 public:
     GLuint shader, VAO, VBO;
     rings();
+    void render();
+};
+
+class arrow
+{
+public:
+    GLuint shader, VAO, VBO;
+    arrow();
     void render();
 };
