@@ -110,12 +110,6 @@ int main()
 		if (show_debug)
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		if (loaded == false)
-		{
-			loaded = true;
-		//	star_maps.load_save(3);
-		}
-
 		glfwSwapBuffers(star_maps_window);
 	}
 
