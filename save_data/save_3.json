@@ -31,7 +31,7 @@
             },
             "obj_type": 1,
             "parent": 1,
-            "texture": 1
+            "texture": 2
         },
         {
             "location": {
@@ -41,7 +41,7 @@
             },
             "obj_type": 1,
             "parent": 1,
-            "texture": 1
+            "texture": 3
         },
         {
             "location": {
@@ -51,7 +51,7 @@
             },
             "obj_type": 1,
             "parent": 1,
-            "texture": 1
+            "texture": 4
         },
         {
             "location": {
@@ -61,7 +61,7 @@
             },
             "obj_type": 1,
             "parent": 1,
-            "texture": 1
+            "texture": 5
         },
         {
             "location": {
@@ -81,7 +81,7 @@
             },
             "obj_type": 2,
             "parent": 2,
-            "texture": 2
+            "texture": 6
         },
 	{
             "location": {
@@ -91,7 +91,7 @@
             },
             "obj_type": 2,
             "parent": 4,
-            "texture": 2
+            "texture": 6
         }
     ],
     "galaxy_name": "test",

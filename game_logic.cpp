@@ -204,11 +204,11 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	this->num_entitys = this->entitiys.size();
 	long int new_entity_id = ++this->num_entitys;
 	
-	std::cout << "spawning new entity of type " << type << ". - ID: " << std::endl;
+	std::cout << "spawning new entity of type " << type << ". - ID: " << new_entity_id << std::endl;
 	game_object* new_ent = new game_object();
 
 	switch (type) {
-	case 0:
+	case 0: // Sun
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
 		new_ent->LoadObject("assets/objects/planets/planet.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -217,7 +217,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->size_adjust = 10;
 		new_ent->render_bb = true;
 		break;
-	case 1:
+	case 1: // Planet
 		std::cout << "X " << new_entity_id << std::endl;
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
 		new_ent->LoadObject("assets/objects/planets/planet.obj");
@@ -226,9 +226,25 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->size_adjust = 5;
 		new_ent->orbit_speed = 0.5;
 		break;
-	case 2:
+	case 2: // Ship
 		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
 		new_ent->LoadObject("assets/objects/ships/ship_1/ship_1_cent.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 1;
+		break;
+	case 3: // Holo Drive-In
+		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
+		new_ent->LoadObject("assets/objects/stations/holodrivein/holodrivein.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 1;
+		break;
+	case 4: // Road Start/End
+		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
+		new_ent->LoadObject("assets/objects/stations/roadgate/road_gate.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
@@ -246,8 +262,19 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->LoadTexture("assets/textures/planets/earth.jpg");
 		break;
 	case 2:
+		new_ent->LoadTexture("assets/textures/planets/p1.jpg");
+		break;
+	case 3:
+		new_ent->LoadTexture("assets/textures/planets/p2.jpg");
+		break;
+	case 4:
+		new_ent->LoadTexture("assets/textures/planets/p3.jpg");
+		break;
+	case 5:
+		new_ent->LoadTexture("assets/textures/planets/p4.jpg");
+		break;
+	case 6:
 		new_ent->LoadTexture("assets/objects/ships/ship_1/textures/ship_1.png");
-		//new_ent->LoadTexture("assets / objects / test / Low_Poly_Vehicles_carPolice.obj");
 		break;
 	default:
 		std::cout << "Error: invalid type" << std::endl;
