@@ -201,7 +201,6 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 
 void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location)
 {
-	std::cout << "test" << std::endl;
 	this->num_entitys = this->entitiys.size();
 	long int new_entity_id = ++this->num_entitys;
 	
@@ -219,7 +218,6 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->render_bb = true;
 		break;
 	case 1: // Planet
-		std::cout << "X " << new_entity_id << std::endl;
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
 		new_ent->LoadObject("assets/objects/planets/planet.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -289,7 +287,6 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->orbit_speed = orbit_speeds[this->num_entitys - 1];
 		new_ent->size_adjust = size_changes[new_entity_id - 2];
 	}
-	std::cout << this->num_entitys << std::endl;
 	glUseProgram(new_ent->shader);
 
 	int success;

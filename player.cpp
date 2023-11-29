@@ -113,17 +113,17 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 			float tExitMin = glm::min(glm::min(tExit.x, tExit.y), tExit.z);
 
 			if (tEnterMax <= tExitMin && tExitMin >= 0.0f) {
-				std::cout << "Intersection with object " << obj->planet_entity_id << std::endl;
 				obj->render_bb = true;
-				// Handle intersection here (e.g., select or interact with the object)
-				return obj->position; // Return the position of the clicked object
+				return obj->position;
 			}
 			else {
 				obj->render_bb = false;
 			}
+		}
 	}
 	return glm::vec3(-999999.0f);
 }
+
 
 // Initialize json interpreter for save data and user settings and set up a struct of the default
 // settings to be used if the settings.json file is missing.
