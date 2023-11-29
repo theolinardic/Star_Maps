@@ -161,7 +161,7 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 		}
 
 	}
-
+	/*
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
 	ImGui::Text("Sols passed: %d", this->sols_passed);
@@ -196,6 +196,8 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 	}
 	if (ImGui::Button("Clear All Ents"))
 		this->despawn_all_entities();
+
+		*/
 }
 
 void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location)
