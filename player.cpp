@@ -61,8 +61,8 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 		camera_pitch = -89.0f;
 	}
 
-	glm::mat4 viewMatrix = glm::lookAt(camera_position, camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+	glm::mat4 viewMatrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 4000.0f);
 	glm::mat4 inverseProjectionMatrix = glm::inverse(projectionMatrix);
 	glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
 
@@ -81,8 +81,8 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 		float ndcX = (2.0f * mouseX) / windowWidth - 1.0f;
 		float ndcY = 1.0f - (2.0f * mouseY) / windowHeight;
 
-		glm::vec4 rayStart_NDC = glm::vec4((2.0f * mouseX) / windowWidth - 1.0f, 1.0f - (2.0f * mouseY) / windowHeight, -1.0f, 1.0f);
-		glm::vec4 rayEnd_NDC = glm::vec4((2.0f * mouseX) / windowWidth - 1.0f, 1.0f - (2.0f * mouseY) / windowHeight, 1.0f, 1.0f);
+		glm::vec4 rayStart_NDC = glm::vec4(ndcX, ndcY, -1.0f, 1.0f);
+		glm::vec4 rayEnd_NDC = glm::vec4(ndcX, ndcY, 1.0f, 1.0f);
 
 		glm::vec4 rayStart_world = inverseProjectionMatrix * rayStart_NDC;
 		rayStart_world /= rayStart_world.w;
@@ -92,7 +92,6 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 
 		rayStart_world = inverseViewMatrix * rayStart_world;
 		rayEnd_world = inverseViewMatrix * rayEnd_world;
-
 
 		// Calculate the direction of the ray
 		glm::vec3 rayDirection = glm::normalize(glm::vec3(rayEnd_world - rayStart_world));
@@ -120,9 +119,23 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 
 			if (tEnterMax <= tExitMin && tExitMin >= 0.0f) {
 				std::cout << "Intersection with object " << obj->planet_entity_id << std::endl;
+				obj->render_bb = true;
 				// Handle intersection here (e.g., select or interact with the object)
 				return obj->position; // Return the position of the clicked object
 			}
+			else {
+				obj->render_bb = false;
+			}
+
+			std::cout << "Object ID: " << obj->planet_entity_id << std::endl;
+			std::cout << "Bounding Box Min: (" << bboxMin.x << ", " << bboxMin.y << ", " << bboxMin.z << ")" << std::endl;
+			std::cout << "Bounding Box Max: (" << bboxMax.x << ", " << bboxMax.y << ", " << bboxMax.z << ")" << std::endl;
+			std::cout << "Ray Direction: (" << rayDirection.x << ", " << rayDirection.y << ", " << rayDirection.z << ")" << std::endl;
+			std::cout << "Ray Start World: (" << rayStart_world.x << ", " << rayStart_world.y << ", " << rayStart_world.z << ")" << std::endl;
+			std::cout << "Ray End World: (" << rayEnd_world.x << ", " << rayEnd_world.y << ", " << rayEnd_world.z << ")" << std::endl;
+			std::cout << "tEnterMax: " << tEnterMax << std::endl;
+			std::cout << "tExitMin: " << tExitMin << std::endl;
+			std::cout << "Intersection Result: " << (tEnterMax <= tExitMin && tExitMin >= 0.0f) << std::endl;
 		}
 
 	//	std::cout << "rayStart_NDC: (" << rayStart_NDC.x << ", " << rayStart_NDC.y << ", " << rayStart_NDC.z << ", " << rayStart_NDC.w << ")" << std::endl;

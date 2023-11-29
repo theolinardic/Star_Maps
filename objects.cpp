@@ -240,7 +240,7 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
     this->vm = viewMatrix;
     this->pm = projectionMatrix;
     this->mm = modelMatrix;
-
+    this->position = modelMatrix[3];
 }
 
 

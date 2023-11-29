@@ -73,16 +73,16 @@ int main()
 		front.z = sin(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
 		camera_front = glm::normalize(front);
 
+		if (!io.WantCaptureMouse)
+		{
+			glm::vec3 check_item = read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
+		}
+
 		SB.render(camera_position, camera_front);
 		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
 		
 		float time_open_sec = glfwGetTime() - launch_time;
 		int time_open_min = time_open_sec / 60;
-
-		if (!io.WantCaptureMouse)
-		{
-			glm::vec3 check_item = read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
-		}
 
 		// Create elements for the debug tools to displa and render them to the screen.
 		ImGui::Begin("Debug Window");
