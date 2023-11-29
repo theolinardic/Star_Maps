@@ -124,11 +124,6 @@ void star_maps_game::give_money(int amount)
 	this->player_money += amount;
 }
 
-void star_maps_game::pass_debug(debug* dm)
-{
-	this->debug_menu = dm;
-}
-
 void star_maps_game::update_debug_ingame_clock(float time_to_add)
 {
 	// Modify to handle all debug HUD.
