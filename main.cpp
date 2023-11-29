@@ -44,6 +44,7 @@ int main()
 	// Initialize debug menu and add base debug items.
 	debug* debug_menu = new debug;
 	debug_menu->start();
+	star_maps.pass_debug(debug_menu);
 	debug_menu->add_text_float("Cam Pos X: ", &camera_position.x);
 	debug_menu->add_text_float("Cam Pos Y: ", &camera_position.y);
 	debug_menu->add_text_float("Cam Pos Z: ", &camera_position.z);
@@ -52,7 +53,6 @@ int main()
 	debug_menu->add_text_float("Cam Rot Z: ", &front.z);
 	debug_menu->add_checkbox("Paused: ", &star_maps.paused);
 
-	
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
 	{
@@ -84,9 +84,9 @@ int main()
 	}
 
 	// ImGui Dev UI and GLFW Clean Up at the end of program.
-	//ImGui_ImplOpenGL3_Shutdown();
-//	ImGui_ImplGlfw_Shutdown();
-//	ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 	glfwDestroyWindow(star_maps_window);
 	glfwTerminate();
 

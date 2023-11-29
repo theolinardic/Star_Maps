@@ -1,6 +1,5 @@
 #include <game_logic.h>
 
-
 // Time Ratio:
 // 1 Second IRL = 1 Minute In-Game
 // 1 Minute IRL = 1 Hour In-Game
@@ -123,6 +122,11 @@ void star_maps_game::give_money(int amount)
 	this->player_money += amount;
 }
 
+void star_maps_game::pass_debug(debug* dm)
+{
+	this->debug_menu = dm;
+}
+
 void star_maps_game::update_debug_ingame_clock(float time_to_add)
 {
 	// Modify to handle all debug HUD.
@@ -161,11 +165,12 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 		}
 
 	}
+	
+	this->debug_menu->add_text_int("Spawned Entitys: ", &this->num_entitys);
+//	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
+//	ImGui::Text("Sols passed: %d", this->sols_passed);
+//	ImGui::Text("Clock: %d:%d:%.2f", this->in_game_hour, this->in_game_minute, this->in_game_second);
 	/*
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
-	ImGui::Text("Sols passed: %d", this->sols_passed);
-	ImGui::Text("Clock: %d:%d:%.2f", this->in_game_hour, this->in_game_minute, this->in_game_second);
 	ImGui::SliderFloat("Game Speed", &this->game_speed_multiplier, 1.0, 1000.0);
 	ImGui::Text("Galaxy Name: %s", this->current_save_name.c_str());
 	ImGui::Text("Save file idx: %d", this->current_save_idx);
@@ -196,7 +201,6 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 	}
 	if (ImGui::Button("Clear All Ents"))
 		this->despawn_all_entities();
-
 		*/
 }
 

@@ -15,6 +15,7 @@
 #include <json.hpp>
 #include <objects.h>
 #include <player.h>
+#include <debug_menu.h>
 
 class star_maps_game
 {
@@ -23,7 +24,7 @@ public:
 	bool paused;
 	bool loaded_save;
 
-	long int num_entitys;
+	int num_entitys;
 	std::vector<game_object*> entitiys;
 	rings* orbit_rings;
 
@@ -43,6 +44,8 @@ public:
 	float status_2_percent;
 	float status_3_percent;
 
+	debug* debug_menu;
+
 
 	star_maps_game(bool p);
 	void update_debug_ingame_clock(float time_to_add);
@@ -56,4 +59,5 @@ public:
 	void despawn_all_entities();
 	void check_click(glm::vec3 camera_position, glm::vec3 mouse_pos);
 	void switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch);
+	void pass_debug(debug* dm);
 };
