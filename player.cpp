@@ -103,11 +103,6 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 			glm::vec3 bboxMin = obj->boundingBoxMin + obj->position;
 			glm::vec3 bboxMax = obj->boundingBoxMax + obj->position;
 
-		//	std::cout << obj->planet_entity_id << std::endl;
-		//	std::cout << bboxMin.x << " " << bboxMin.y << " " << bboxMin.z << " " << std::endl;
-		//	std::cout << bboxMax.x << " " << bboxMax.y << " " << bboxMax.z << " " << std::endl;
-		//	std::cout << obj->position.x << " " << obj->position.y << " " << obj->position.z << " " << std::endl;
-
 			glm::vec3 tMin = (bboxMin - glm::vec3(rayStart_world)) * invDirection;
 			glm::vec3 tMax = (bboxMax - glm::vec3(rayStart_world)) * invDirection;
 
@@ -126,26 +121,9 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 			else {
 				obj->render_bb = false;
 			}
-
-			std::cout << "Object ID: " << obj->planet_entity_id << std::endl;
-			std::cout << "Bounding Box Min: (" << bboxMin.x << ", " << bboxMin.y << ", " << bboxMin.z << ")" << std::endl;
-			std::cout << "Bounding Box Max: (" << bboxMax.x << ", " << bboxMax.y << ", " << bboxMax.z << ")" << std::endl;
-			std::cout << "Ray Direction: (" << rayDirection.x << ", " << rayDirection.y << ", " << rayDirection.z << ")" << std::endl;
-			std::cout << "Ray Start World: (" << rayStart_world.x << ", " << rayStart_world.y << ", " << rayStart_world.z << ")" << std::endl;
-			std::cout << "Ray End World: (" << rayEnd_world.x << ", " << rayEnd_world.y << ", " << rayEnd_world.z << ")" << std::endl;
-			std::cout << "tEnterMax: " << tEnterMax << std::endl;
-			std::cout << "tExitMin: " << tExitMin << std::endl;
-			std::cout << "Intersection Result: " << (tEnterMax <= tExitMin && tExitMin >= 0.0f) << std::endl;
-		}
-
-	//	std::cout << "rayStart_NDC: (" << rayStart_NDC.x << ", " << rayStart_NDC.y << ", " << rayStart_NDC.z << ", " << rayStart_NDC.w << ")" << std::endl;
-		//std::cout << "rayEnd_NDC: (" << rayEnd_NDC.x << ", " << rayEnd_NDC.y << ", " << rayEnd_NDC.z << ", " << rayEnd_NDC.w << ")" << std::endl;
-	//	std::cout << "rayStart_world: (" << rayStart_world.x << ", " << rayStart_world.y << ", " << rayStart_world.z << ", " << rayStart_world.w << ")" << std::endl;
-	//	std::cout << "rayEnd_world: (" << rayEnd_world.x << ", " << rayEnd_world.y << ", " << rayEnd_world.z << ", " << rayEnd_world.w << ")" << std::endl;
 	}
 	return glm::vec3(-999999.0f);
 }
-
 
 // Initialize json interpreter for save data and user settings and set up a struct of the default
 // settings to be used if the settings.json file is missing.
