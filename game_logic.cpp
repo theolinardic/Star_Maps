@@ -21,6 +21,8 @@ star_maps_game::star_maps_game(bool p)
 	this->num_entitys = 0;
 
 	this->orbit_rings = new rings();
+
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
 }
 
 int diff_text_to_int(std::string diff)
@@ -165,11 +167,13 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 		}
 
 	}
-	
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
 	this->debug_menu->add_text_int("Spawned Entitys: ", &this->num_entitys);
 //	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
 //	ImGui::Text("Sols passed: %d", this->sols_passed);
-//	ImGui::Text("Clock: %d:%d:%.2f", this->in_game_hour, this->in_game_minute, this->in_game_second);
+	ImGui::Text("Clock: %d:%d:%.2f", this->in_game_hour, this->in_game_minute, this->in_game_second);
 	/*
 	ImGui::SliderFloat("Game Speed", &this->game_speed_multiplier, 1.0, 1000.0);
 	ImGui::Text("Galaxy Name: %s", this->current_save_name.c_str());
@@ -202,6 +206,10 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 	if (ImGui::Button("Clear All Ents"))
 		this->despawn_all_entities();
 		*/
+
+//	ImGui::End();
+//	ImGui::Render();
+//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location)

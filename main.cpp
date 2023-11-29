@@ -53,6 +53,7 @@ int main()
 	debug_menu->add_text_float("Cam Rot Z: ", &front.z);
 	debug_menu->add_checkbox("Paused: ", &star_maps.paused);
 
+	bool loaded = false;
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
 	{
@@ -79,6 +80,12 @@ int main()
 		glm::vec3 check_item = read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
 	
 		debug_menu->render();
+
+		if (loaded == false)
+		{
+			loaded = true;
+		//	star_maps.load_save(3);
+		}
 
 		glfwSwapBuffers(star_maps_window);
 	}
