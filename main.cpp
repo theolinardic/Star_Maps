@@ -12,7 +12,7 @@
 #include <json.hpp>
 // Below  are original source files for Star Maps:
 #include <objects.h>
-#include <generateMap.h>
+#include <generate_map.h>
 #include <player.h>
 #include <game_logic.h>
 

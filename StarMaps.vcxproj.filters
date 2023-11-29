@@ -72,7 +72,7 @@
     <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="generateMap.cpp">
+    <ClCompile Include="generate_map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_logic.cpp">
@@ -119,7 +119,7 @@
     <ClInclude Include="External Libraries\imgui\imgui.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="include\generateMap.h">
+    <ClInclude Include="include\generate_map.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\load_object.h">

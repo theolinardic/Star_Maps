@@ -151,7 +151,7 @@
     <ClCompile Include="External Libraries\imgui\imgui_tables.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_widgets.cpp" />
     <ClCompile Include="game_logic.cpp" />
-    <ClCompile Include="generateMap.cpp" />
+    <ClCompile Include="generate_map.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="load_object.cpp" />
     <ClCompile Include="main.cpp" />
@@ -169,7 +169,7 @@
     <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
     <ClInclude Include="include\game_logic.h" />
-    <ClInclude Include="include\generateMap.h" />
+    <ClInclude Include="include\generate_map.h" />
     <ClInclude Include="include\json.hpp" />
     <ClInclude Include="include\load_object.h" />
     <ClInclude Include="include\player.h" />

@@ -1,4 +1,4 @@
-#include <generateMap.h>
+#include <generate_map.h>
 
 // Start game window with GLFW and OpenGL and return the window reference.
 GLFWwindow* initialize_glfw_window(void)
