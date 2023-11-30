@@ -20,6 +20,7 @@ Images/Textures:
 - [Prinble's Hi-Tech Buttons Pack I](https://prinbles.itch.io/hi-tech-buttons-pack-i)
 - [Solar System Scope's Textures](https://www.solarsystemscope.com/textures/)
 - [Star Chart Reference Image](https://framerusercontent.com/images/iFqcf8aTsBOnWxemfaIONObBGCk.png?scale-down-to=1024)
+- [Save Icon](https://icon-icons.com/icon/save-the-application-guardar/2396)
 
 Sounds:
 - [Ellr's Universal UI/Menu Soundpack](https://ellr.itch.io/universal-ui-soundpack)
