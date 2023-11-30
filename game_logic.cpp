@@ -278,7 +278,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	default:
 		std::cout << "Error: invalid type" << std::endl;
 	}
-	float orbit_speeds[7] = { 0.05, 0.15, 0.02, 0.25, 0.09, 0.05, 0.12};
+	float orbit_speeds[7] = { 0.05, 0.02, 0.025, 0.045, 0.09, 0.005, 0.009};
 	float size_changes[7] = {.25, 0.45, 0.35, 0.15, 0.75, 0.45, 0.30};
 	float radiuses[7] = { 80, 70, 130, 380, 98, 205, 250 };
 	if (new_entity_id > 1 && new_entity_id < 8)
