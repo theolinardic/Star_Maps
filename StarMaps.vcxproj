@@ -154,6 +154,7 @@
     <ClCompile Include="game_logic.cpp" />
     <ClCompile Include="generate_map.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="hud_control.cpp" />
     <ClCompile Include="load_object.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="player.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="include\audio_engine.h" />
     <ClInclude Include="include\game_logic.h" />
     <ClInclude Include="include\generate_map.h" />
+    <ClInclude Include="include\hud_control.h" />
     <ClInclude Include="include\json.hpp" />
     <ClInclude Include="include\load_object.h" />
     <ClInclude Include="include\player.h" />
