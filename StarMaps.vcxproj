@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="audio_engine.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_demo.cpp" />
     <ClCompile Include="External Libraries\imgui\imgui_draw.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="External Libraries\imgui\imstb_rectpack.h" />
     <ClInclude Include="External Libraries\imgui\imstb_textedit.h" />
     <ClInclude Include="External Libraries\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\audio_engine.h" />
     <ClInclude Include="include\game_logic.h" />
     <ClInclude Include="include\generate_map.h" />
     <ClInclude Include="include\json.hpp" />

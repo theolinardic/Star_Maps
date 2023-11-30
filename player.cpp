@@ -114,9 +114,6 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 
 			if (tEnterMax <= tExitMin && tExitMin >= 0.0f) {
 				obj->render_bb = true;
-				irrklang::ISoundEngine* SoundEngine = irrklang::createIrrKlangDevice();
-				SoundEngine->play2D("assets/sounds/test.wav", true);
-			//	SoundEngine->drop();
 				return obj->position;
 			}
 			else {
