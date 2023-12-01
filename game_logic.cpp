@@ -144,6 +144,168 @@ void star_maps_game::save_game()
 	update_save(this->current_save_idx, updated_data);
 }
 
+// Function to generate the data for a new save file based on the passed in difficulty and galaxy name.
+json star_maps_game::generate_new_save_data(const std::string difficulty, const std::string galaxy_name) {
+	std::ifstream file(PLANET_NAME_JSON);
+	json data;
+	file >> data;
+
+	std::vector<std::string> picked_names;
+	std::vector<std::string> planet_names;
+	for (const auto& planet : data["planet_names"])
+		planet_names.push_back(planet);
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	while (picked_names.size() < 6)
+	{
+		std::uniform_int_distribution<> dis(0, planet_names.size() - 1);
+		int random = dis(gen);
+		std::string picked = planet_names[random];
+
+		auto it = std::find(picked_names.begin(), picked_names.end(), picked);
+		if (it == picked_names.end())
+		{
+			picked_names.push_back(picked);
+			planet_names.erase(planet_names.begin() + random);
+		}
+	}
+
+	int money = 0;
+	if (difficulty == "easy") {
+		money = 100000000;
+	}
+	else if (difficulty == "medium") {
+		money = 10000000;
+	}
+	else if (difficulty == "hard") {
+		money = 1000000;
+	}
+	else {
+		std::cout << difficulty << std::endl;
+		money = -99999999999999;
+	}
+
+	json entities;
+	entities.push_back({
+		{"obj_type", 0},
+		{"texture", 0},
+		{"parent", -1},
+		{"location", {{"X", 0}, {"Y", 0}, {"Z", 0}}}
+		});
+
+	for (size_t i = 0; i < picked_names.size(); ++i) {
+		entities.push_back({
+			{"obj_type", 1},
+			{"texture", 1},
+			{"parent", 1},
+			{"location", {{"X", -15.2f * i}, {"Y", 30.8f * i}, {"Z", 12.0f * i}}}
+			});
+	}
+
+	return {
+		{"current_sol", 0},
+		{"current_time", "05H_05M_16.589310S"},
+		{"difficulty", difficulty},
+		{"galaxy_name", galaxy_name},
+		{"money", money},
+		{"status_1_percent", 100.0},
+		{"status_2_percent", 100.0},
+		{"status_3_percent", 100.0},
+		{"total_time_played", "02H_08M_12.238135S"},
+		{"entities", entities}
+	};
+}
+
+// Function to create a new save file with the supplied galaxy name and difficulty.
+void star_maps_game::create_new_save(const std::string difficulty, const std::string galaxy_name) {
+	// Read in the existing save files in the save data directory.
+	std::vector<std::string> existing_saves;
+	std::string save_folder = "save_data/";
+	for (const auto& file : std::filesystem::directory_iterator(save_folder)) {
+		if (file.path().extension() == ".json") {
+			existing_saves.push_back(file.path().filename().string());
+		}
+	}
+	// Find the highest index save file so that the numbering can be kept consistent (save_1, save_2, etc.)
+	int new_file_index = 1;
+	if (!existing_saves.empty()) {
+		std::vector<int> indexes;
+		std::transform(existing_saves.begin(), existing_saves.end(), std::back_inserter(indexes),
+			[](const std::string& filename) {
+				return std::stoi(filename.substr(5, filename.find('.') - 5));
+			});
+		new_file_index = *std::max_element(indexes.begin(), indexes.end()) + 1;
+	}
+	// Create a new save file at the found next index.
+	std::string new_save_location = save_folder + "save_" + std::to_string(new_file_index) + ".json";
+	std::ofstream save_file(new_save_location);
+	if (save_file.is_open()) {
+		json data = generate_new_save_data(difficulty, galaxy_name);
+		save_file << std::setw(4) << data << std::endl;
+		save_file.close();
+	}
+}
+
+// Function to delete an existing save file.
+void star_maps_game::delete_save(int delete_index) {
+	std::string save_folder = "save_data/";
+	std::string save_to_delete = save_folder + "save_" + std::to_string(delete_index) + ".json";
+	std::remove(save_to_delete.c_str());
+	// Find the number of saves already in the file so they can all be readjusted and the +1 numbering pattern is kept.
+	for (const auto& file : std::filesystem::directory_iterator(save_folder)) {
+		int current_index = std::stoi(file.path().filename().string().substr(5, file.path().filename().string().find('.') - 5));
+		if (current_index > delete_index) {
+			std::string new_name = save_folder + "save_" + std::to_string(current_index - 1) + ".json";
+			std::filesystem::rename(file.path(), new_name);
+		}
+	}
+}
+
+// Function to get some preview data from all of the current save files for the load save screen.
+// This will help distinguish between the save files at a glance easier.
+// TO-DO: Try to implement a screenshot of the galaxy on the save load menu if possible.
+std::vector<json> star_maps_game::preview_saves() {
+	std::vector<json> save_previews;
+	std::string save_folder = "save_data/";
+	for (const auto& file : std::filesystem::directory_iterator(save_folder)) {
+		std::string save_file_path = file.path().string();
+		std::ifstream file_stream(save_file_path);
+		if (file_stream.is_open()) {
+			json save_data;
+			file_stream >> save_data;
+
+			json save_preview = {
+				{"galaxy_name", save_data.value("galaxy_name", "")},
+				{"difficulty", save_data.value("difficulty", "")},
+				{"current_sol", save_data.value("current_sol", 0)},
+				{"current_time", save_data.value("current_time", "")},
+				{"total_time_played", save_data.value("total_time_played", "")},
+				{"save_index", std::stoi(file.path().filename().string().substr(5, file.path().filename().string().find('.') - 5))}
+			};
+			save_previews.push_back(save_preview);
+			file_stream.close();
+		}
+	}
+	return save_previews;
+}
+
+// Function to update the players save file with all of the new information passed in.
+void star_maps_game::update_save(int index, const json& new_data)
+{
+	std::string save_folder = "save_data/";
+	std::string save_file_path = save_folder + "save_" + std::to_string(index) + ".json";
+	std::ofstream file(save_file_path);
+	if (file.is_open()) {
+		file << std::setw(4) << new_data << std::endl;
+		file.close();
+		std::cout << "Save file updated" << std::endl;
+	}
+	else
+		std::cerr << "Unable to open the save file" << std::endl;
+}
+
 // Function to give or take away money from the player (for testing purposes).
 void star_maps_game::give_money(int amount)
 {

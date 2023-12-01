@@ -42,6 +42,11 @@ public:
 	void change_setting(const std::string setting, const json new_value);
 	void load_save(int index);
 	void save_game();
+	json generate_new_save_data(const std::string difficulty, const std::string galaxy_name);
+	void create_new_save(const std::string difficulty, const std::string galaxy_name);
+	void delete_save(int delete_index);
+	std::vector<json> preview_saves();
+	void update_save(int index, const json& new_data);
 	void give_money(int amount);
 	void update_debug_ingame_clock(float time_to_add);
 	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed);
