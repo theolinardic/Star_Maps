@@ -42,7 +42,7 @@ void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position,
 		// Define the view and projection matrices for the camera, as well as the inverse of those matrices
 		// which will be used for raycasting to find which object the player clicked on:
 		glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 projection_matrix = glm::perspective(glm::radians(45.0f), window_width + 0.0f / window_height, 0.1f, 4000.0f);
+		glm::mat4 projection_matrix = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.1f, 4000.0f);
 		glm::mat4 inverse_projection_matrix = glm::inverse(projection_matrix);
 		glm::mat4 inverse_view_matrix = glm::inverse(view_matrix);
 		glm::vec3 out_direction = glm::vec3(-99999.0f);
@@ -82,7 +82,6 @@ void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position,
 			// the objects changes through out its time existing in the game world:
 			glm::vec3 bboxMin = obj->boundingBoxMin + obj->position;
 			glm::vec3 bboxMax = obj->boundingBoxMax + obj->position;
-
 			glm::vec3 tMin = (bboxMin - glm::vec3(ray_start_world)) * inv_direction;
 			glm::vec3 tMax = (bboxMax - glm::vec3(ray_start_world)) * inv_direction;
 			glm::vec3 tEnter = glm::min(tMin, tMax);
@@ -90,7 +89,7 @@ void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position,
 			float tEnterMax = glm::max(glm::max(tEnter.x, tEnter.y), tEnter.z);
 			float tExitMin = glm::min(glm::min(tExit.x, tExit.y), tExit.z);
 
-			// If the raycast enters the bounding box anywhere, set the bounding box to be visible. 
+			// If the raycast enters the bounding box anywhere, set the bounding box to be visible,
 			// Mainly for testing purposes for now:
 			if (tEnterMax <= tExitMin && tExitMin >= 0.0f)
 				obj->render_bb = true;

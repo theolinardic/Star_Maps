@@ -1,7 +1,11 @@
 #pragma once
 
+#include <random>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
+#include <vector>
+#include <algorithm>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
