@@ -100,7 +100,7 @@ void game_object::LoadObject(const char* objFilePath) {
 
     this->indicesCount = indices.size();
     this->obj_verts = verticesCopy;
-    // Debug print to check vertices and UVs alignment
+    // Debug print to check vertices and UVs after loading and processing obj files.
     std::cout << "Number of Vertices: " << vertices.size() / 8 << std::endl;
     std::cout << "Number of Indices: " << indices.size() / 3 << std::endl;
 
@@ -123,9 +123,8 @@ void game_object::LoadTexture(const char* textureFilePath) {
 
         SOIL_free_image_data(data);
     }
-    else {
+    else
         std::cout << "Failed to load texture: " << textureFilePath << std::endl;
-    }
 }
 
 void game_object::teleport(glm::vec3 new_pos)
@@ -135,7 +134,7 @@ void game_object::teleport(glm::vec3 new_pos)
 
 glm::vec3 game_object::get_center() {
     glm::vec3 center(0.0f);
-    unsigned int vertexCount = this->obj_verts.size() / 3; // Number of vertices, assuming 3 values per vertex
+    unsigned int vertexCount = this->obj_verts.size() / 3;
 
     for (unsigned int i = 0; i < this->obj_verts.size(); i += 3) {
         center.x += this->obj_verts[i];
@@ -143,7 +142,7 @@ glm::vec3 game_object::get_center() {
         center.z += this->obj_verts[i + 2];
     }
 
-    center.x /= static_cast<float>(vertexCount); // Divide by the number of vertices
+    center.x /= static_cast<float>(vertexCount);
     center.y /= static_cast<float>(vertexCount);
     center.z /= static_cast<float>(vertexCount);
     return center;
@@ -155,14 +154,11 @@ float game_object::get_radius() {
 
     for (unsigned int i = 0; i < this->obj_verts.size(); i += 3) {
         float distance = glm::distance(center, glm::vec3(this->obj_verts[i], this->obj_verts[i + 1], this->obj_verts[i + 2]));
-        if (distance > maxDistance) {
+        if (distance > maxDistance)
             maxDistance = distance;
-        }
     }
-
     return maxDistance;
 }
-
 
 void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& cameraFront, float game_speed)
 {

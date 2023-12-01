@@ -44,6 +44,9 @@ public:
 	float status_3_percent;
 
 	star_maps_game(bool p);
+	void reset_settings();
+	nlohmann::json get_settings();
+	void change_setting(const std::string setting, const nlohmann::json new_value);
 	void update_debug_ingame_clock(float time_to_add);
 	void give_money(int amount);
 	void load_save(int index);

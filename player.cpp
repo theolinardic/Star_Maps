@@ -124,58 +124,7 @@ glm::vec3 read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_posi
 	return glm::vec3(-999999.0f);
 }
 
-
-// Initialize json interpreter for save data and user settings and set up a struct of the default
-// settings to be used if the settings.json file is missing.
 using json = nlohmann::json;
-json default_settings = {
-	{"res_width", 1280},
-	{"res_height", 720},
-	{"fullscreen", false},
-	// 1=low, 2=medium, 3=high
-	{"graphics_preset", "high"},
-	{"fps_cap", 0}
-};
-
-// Function to rest all of the settings to the default values defined above.
-void reset_settings() {
-	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
-	settings_file << default_settings.dump(4);
-	settings_file.close();
-}
-
-// Function to get the user settings from the SETTINGS_FILE_LOCATION and return them.
-json get_settings()
-{
-	json user_settings;
-	std::ifstream settings_file(SETTINGS_FILE_LOCATION);
-	// If the file opened correctly, read in to user_settings.
-	if (settings_file.is_open())
-	{
-		settings_file >> user_settings;
-		settings_file.close();
-	}
-	// If no settings file is found, create a new one with default settings from above.
-	else
-	{
-		reset_settings();
-
-		// Reload settings after creating a new file
-		return get_settings();
-	}
-
-	return user_settings;
-}
-
-// Function to change a setting to a new value.
-void change_setting(const std::string setting, const json new_value) {
-	json user_settings = get_settings();
-	user_settings[setting] = new_value;
-
-	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
-	settings_file << user_settings.dump(4);
-	settings_file.close();
-}
 
 // Function to generate the data for a new save file based on the difficulty and galaxy name.
 json generate_new_save_data(const std::string difficulty, const std::string galaxy_name) {

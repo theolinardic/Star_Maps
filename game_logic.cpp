@@ -25,6 +25,58 @@ star_maps_game::star_maps_game(bool p)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 }
 
+// Initialize json interpreter for save data and user settings and set up a struct of the default
+// settings to be used if the settings.json file is missing.
+using json = nlohmann::json;
+json default_settings = {
+	{"res_width", 1280},
+	{"res_height", 720},
+	{"fullscreen", false},
+	// 1=low, 2=medium, 3=high
+	{"graphics_preset", "high"},
+	{"fps_cap", 0}
+};
+
+// Function to rest all of the settings to the default values defined above.
+void star_maps_game::reset_settings() {
+	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
+	settings_file << default_settings.dump(4);
+	settings_file.close();
+}
+
+// Function to get the user settings from the SETTINGS_FILE_LOCATION and return them.
+json star_maps_game::get_settings()
+{
+	json user_settings;
+	std::ifstream settings_file(SETTINGS_FILE_LOCATION);
+	// If the file opened correctly, read in to user_settings.
+	if (settings_file.is_open())
+	{
+		settings_file >> user_settings;
+		settings_file.close();
+	}
+	// If no settings file is found, create a new one with default settings from above.
+	else
+	{
+		reset_settings();
+
+		// Reload settings after creating a new file
+		return get_settings();
+	}
+
+	return user_settings;
+}
+
+// Function to change a setting to a new value.
+void star_maps_game::change_setting(const std::string setting, const json new_value) {
+	json user_settings = get_settings();
+	user_settings[setting] = new_value;
+
+	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
+	settings_file << user_settings.dump(4);
+	settings_file.close();
+}
+
 int diff_text_to_int(std::string diff)
 {
 	if (diff == "easy")
