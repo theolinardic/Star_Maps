@@ -15,6 +15,7 @@
 #include <generate_map.h>
 #include <player.h>
 #include <game_logic.h>
+#include <hud_control.h>
 
 GLfloat lineVertices[] = {
 	// Two points for the line (change as per your needs)
@@ -46,6 +47,8 @@ int main()
 
 	// Start the brain of the game with the core logic.
 	star_maps_game star_maps = star_maps_game(false);
+
+	HUD game_ui = HUD();
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
@@ -109,6 +112,8 @@ int main()
 		ImGui::Render();
 		if (show_debug)
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	//	game_ui.render();
 
 		glfwSwapBuffers(star_maps_window);
 	}

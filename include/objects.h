@@ -78,10 +78,3 @@ public:
     void render();
 };
 
-class arrow
-{
-public:
-    GLuint shader, VAO, VBO;
-    arrow();
-    void render();
-};

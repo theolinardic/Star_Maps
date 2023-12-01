@@ -181,7 +181,10 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
     // Initialize an the model matrix of changes to be made to the object and start by adding the size adjustment.
     glm::mat4 modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(this->size_adjust));
     glm::vec3 orbitCenter;
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f));
 
+
+    // Sun should not orbit...
     if (this->planet_entity_id > 1)
     {
         glm::vec3 parentPlanetCenter = this->parent_planet->get_center();
@@ -197,25 +200,12 @@ void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& camer
 
         modelMatrix = glm::translate(modelMatrix, glm::vec3(orbitX, orbitY, orbitZ));
         modelMatrix = this->parent_planet->parent_mm * modelMatrix;
-
         orbitCenter = glm::vec3(parentPlanetCenter4.x, parentPlanetCenter4.y, parentPlanetCenter4.z);
-
     }
-    else
-    {
-        // Calculate position on the orbit path
-        float orbitX = this->orbit_center.x + this->orbit_radius * cos(this->time_exist * this->orbit_speed);
-        float orbitY = 0.0f;
-        float orbitZ = this->orbit_center.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
 
-        this->position.x = orbitX;
-        this->position.y = orbitY;
-        this->position.z = orbitZ;
-
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(orbitX, orbitY, orbitZ));
-
-        orbitCenter = this->orbit_center;
-    }
+    // Add rotation/spinning for all planets:
+    if (this->planet_entity_id < 8)
+        modelMatrix = rotationMatrix * modelMatrix;
 
     float fov = 45.0f;
     glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -366,61 +356,9 @@ void rings::render()
     {
         glm::mat4 modelorb = glm::mat4(1);
         modelorb = glm::translate(modelorb, glm::vec3(0.0f, 0.0f, 0.0f));
-        // Increase the scaling factor for each ring
-
         modelorb = glm::rotate(modelorb, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-
         modelorb = glm::scale(modelorb, glm::vec3(radiuses[i] * 0.5f, radiuses[i] * 0.5f, radiuses[i] * 0.5f));
         glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(modelorb));
-
         glDrawArrays(GL_LINE_LOOP, 0, 360);
     }
-}
-
-arrow::arrow() {
-    // Load shader, create VAO, VBO, and set up vertices for a single ring
-    this->shader = load_shader("shaders/orbit_rings/vert.glsl", "shaders/orbit_rings/frag.glsl");
-    glUseProgram(this->shader);
-
-    // Generate VAO and VBO
-    glGenVertexArrays(1, &this->VAO);
-    glGenBuffers(1, &this->VBO);
-
-    // Bind VAO and VBO
-    glBindVertexArray(this->VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-
-    GLfloat rayVertices[] = {
-        641.959,  691.955, -1219.92,
-        -3486.45, -3799.48, 6836.2
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rayVertices), rayVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void arrow::render()
-{
-    glBindVertexArray(this->VAO);
-    glLineWidth(1.0f);
-
-    // Update the arrow's position and orientation in the 3D space
-    glm::mat4 modelArrow = glm::mat4(1.0f);
-    // Translate the arrow to a specific position in the scene
-    modelArrow = glm::translate(modelArrow, glm::vec3(0.0f, 0.0f, 0.0f));
-    // Apply a rotation if needed
-    modelArrow = glm::rotate(modelArrow, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    // Scale the arrow if necessary
-    modelArrow = glm::scale(modelArrow, glm::vec3(1.0f, 1.0f, 1.0f));
-
-    // Set the model matrix in the shader
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(modelArrow));
-
-    // Draw the arrow as a line from (0, 0, 0) to (100, 100, 100) in the transformed space
-    glDrawArrays(GL_LINES, 0, 2);
 }
