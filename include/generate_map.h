@@ -11,10 +11,10 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <load_object.h>
+#include <objects.h>
 
 // Constant definitions:
-#define WINDOW_NAME "Star Maps - v0.01"
+#define WINDOW_NAME "Star Maps - v0.30"
 
 // Function declarations:
 GLFWwindow* initialize_glfw_window(void);
@@ -23,9 +23,8 @@ GLuint load_cubemap(const char* faces[]);
 class skybox
 {
 public:
-	GLuint vao, vbo, ebo;
-	GLuint shader;
-	GLuint textureID;
-	void render(glm::vec3 camera_position, glm::vec3 camera_front);
+	GLuint vao, vbo, ebo, shader, texture_id;
+
 	skybox();
+	void render(glm::vec3 camera_position, glm::vec3 camera_front);
 };

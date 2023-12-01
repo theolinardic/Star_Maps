@@ -1,5 +1,4 @@
 // orbit rings vert shader 
-
 #version 330 core
 
 in vec2 texCoord;

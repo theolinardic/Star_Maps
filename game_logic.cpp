@@ -1,10 +1,11 @@
 #include <game_logic.h>
 
-// Time Ratio:
+// Time Ratio (NOT FINAL):
 // 1 Second IRL = 1 Minute In-Game
 // 1 Minute IRL = 1 Hour In-Game
 // 1 Hour IRL = 2.5 Days In-Game
 
+// Class initialization function for star_maps_game, the main logic of the entire game.
 star_maps_game::star_maps_game(bool p)
 {
 	this->paused = p;
@@ -14,98 +15,75 @@ star_maps_game::star_maps_game(bool p)
 	this->in_game_minute = 0;
 	this->in_game_second = 0.0;
 
-	// Load all these from the file after the user picks a save.
+	// Load all these from the file after the user picks a save:
 	this->player_money = 0.00;
 	this->current_save_idx = 0;
 	this->current_save_name = "no save loaded";
 	this->num_entitys = 0;
 
+	// Load planet orbit path rings:
 	this->orbit_rings = new rings();
 
+	// Set up ImGui debug tools:
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 }
-
-// Initialize json interpreter for save data and user settings and set up a struct of the default
-// settings to be used if the settings.json file is missing.
-using json = nlohmann::json;
-json default_settings = {
+// Function to reset all of the settings to the default 'safe' values.
+void star_maps_game::reset_settings() {
+	json default_settings = {
 	{"res_width", 1280},
 	{"res_height", 720},
 	{"fullscreen", false},
 	// 1=low, 2=medium, 3=high
 	{"graphics_preset", "high"},
 	{"fps_cap", 0}
-};
+	};
 
-// Function to rest all of the settings to the default values defined above.
-void star_maps_game::reset_settings() {
 	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
 	settings_file << default_settings.dump(4);
 	settings_file.close();
 }
 
-// Function to get the user settings from the SETTINGS_FILE_LOCATION and return them.
+// Function to pull user settings from the local settings file.
 json star_maps_game::get_settings()
 {
 	json user_settings;
 	std::ifstream settings_file(SETTINGS_FILE_LOCATION);
-	// If the file opened correctly, read in to user_settings.
 	if (settings_file.is_open())
 	{
 		settings_file >> user_settings;
 		settings_file.close();
 	}
-	// If no settings file is found, create a new one with default settings from above.
+	// If no settings file is found, create a new one with default settings as defined in reset_settings():
 	else
 	{
 		reset_settings();
-
-		// Reload settings after creating a new file
 		return get_settings();
 	}
-
 	return user_settings;
 }
 
-// Function to change a setting to a new value.
+// Function to change any setting to a new value.
 void star_maps_game::change_setting(const std::string setting, const json new_value) {
 	json user_settings = get_settings();
 	user_settings[setting] = new_value;
-
 	std::ofstream settings_file(SETTINGS_FILE_LOCATION);
 	settings_file << user_settings.dump(4);
 	settings_file.close();
 }
 
-int diff_text_to_int(std::string diff)
-{
-	if (diff == "easy")
-		return 1;
-	else if (diff == "medium")
-		return 2;
-	else if (diff == "hard")
-		return 3;
-	else
-		return 4;
-}
-
-std::string diff_int_to_text(int diff)
-{
-	if (diff == 1)
-		return "easy";
-	else if (diff == 2)
-		return "medium";
-	else if (diff == 3)
-		return "hard";
-	else
-		return "dev";
-}
-
+// Function to load the save file at passed in index and render all objects from the save data.
 void star_maps_game::load_save(int index)
 {
-	using json = nlohmann::json;
-	json data = load_save_file(index);
+	// Load the json values stored in the save file:
+	std::string save_file = "save_data/save_" + std::to_string(index) + ".json";
+	std::ifstream file(save_file);
+	json data;
 
+	if (file.is_open()) {
+		file >> data;
+		file.close();
+	}
+	// Save the appropriate values from the save file to the game logic:
 	std::cout << "loaded save " << index << "with data: \n" << data << std::endl;
 	this->current_save_idx = index;
 	this->current_save_name = data["galaxy_name"];
@@ -124,24 +102,18 @@ void star_maps_game::load_save(int index)
 	this->status_2_percent = data["status_2_percent"];
 	this->status_3_percent = data["status_3_percent"];
 
-	if (data.find("entities") != data.end()) {
-		for (const auto& entity : data["entities"]) {
-			int obj_type = entity["obj_type"];
-			int texture_id = entity["texture"];
-			int parent = entity["parent"];
-			double locX = entity["location"]["X"];
-			double locY = entity["location"]["Y"];
-			double locZ = entity["location"]["Z"];
+	// Spawn in all game objects from the save data:
+	if (data.find("entities") != data.end())
+		for (const auto& entity : data["entities"])
+			spawn_entity(entity["obj_type"], entity["texture"], entity["parent"], glm::vec3(entity["location"]["X"], entity["location"]["Y"], entity["location"]["Z"]));
 
-			spawn_entity(obj_type, texture_id, parent, glm::vec3(locX, locY, locZ));
-		}
-	}
+	this->loaded_save = true;
 }
 
+// Function to save the game in its current state to a json file.
 void star_maps_game::save_game()
 {
-	using json = nlohmann::json;
-
+	// Get the correct formatting for all of the strings in the save file:
 	std::string in_game_time_out = (this->in_game_hour < 10) ? "0" + std::to_string(this->in_game_hour) : std::to_string(this->in_game_hour);
 	in_game_time_out.append("H_");
 	in_game_time_out.append((this->in_game_minute < 10) ? "0" + std::to_string(this->in_game_minute) : std::to_string(this->in_game_minute));
@@ -168,18 +140,20 @@ void star_maps_game::save_game()
 	   {"status_3_percent", this->status_3_percent}
 	};
 
+	// Call update_save() with the new data to save it to the exising save file:
 	update_save(this->current_save_idx, updated_data);
 }
 
+// Function to give or take away money from the player (for testing purposes).
 void star_maps_game::give_money(int amount)
 {
 	this->player_money += amount;
 }
 
+// Function to handle debug tools inside the game logic.
 void star_maps_game::update_debug_ingame_clock(float time_to_add)
 {
-	// Modify to handle all debug HUD.
-
+	// Update save data played timer if a save file is loaded and the game isn't paused:
 	if (loaded_save && !paused)
 	{
 		this->total_played_second += (time_to_add);
@@ -194,6 +168,7 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 			this->total_played_minute -= 60;
 		}
 	}
+	// Update in game timer if the game isn't paused:
 	if (!paused)
 	{
 		this->in_game_second += (time_to_add * this->game_speed_multiplier);
@@ -212,9 +187,9 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 			this->sols_passed++;
 			this->in_game_hour = 0;
 		}
-
 	}
-
+	
+	// Set up debug values for development tests:
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
 	ImGui::Text("Sols passed: %d", this->sols_passed);
@@ -226,52 +201,57 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 	ImGui::Text("Player Money: %.2f", this->player_money);
 	ImGui::SliderFloat("Cam Sens:", &sensitivity, 1.0f, 4.0f);
 	ImGui::SliderFloat("Move sens:", &movement_speed, 0.1f, 2.0f);
-	if (ImGui::Button("Give $1,000,000")) {
+	if (ImGui::Button("Give $1,000,000"))
 		this->give_money(1000000);
-	}
-	if (ImGui::Button("Subtract $1,000,000")) {
+	if (ImGui::Button("Subtract $1,000,000"))
 		this->give_money(-1000000);
-	}
-	if (ImGui::Button("Load save 1")) {
-		this->load_save(1);
-	}
-	if (ImGui::Button("Load save 2")) {
-		this->load_save(2);
-	}
-	if (ImGui::Button("Save Game")) {
-		this->save_game();
-	}
-	if (ImGui::Button("Gen New Save")) {
+	if (ImGui::Button("Gen New Save"))
 		create_new_save("easy", "test");
-	}
-	if (ImGui::Button("load save 3")) {
+	if (ImGui::Button("Load save 1"))
+		this->load_save(1);
+	if (ImGui::Button("Load save 2"))
+		this->load_save(2);
+	if (ImGui::Button("load save 3"))
 		this->load_save(3);
-	}
+	if (ImGui::Button("Save Game"))
+		this->save_game();
 	if (ImGui::Button("Clear All Ents"))
 		this->despawn_all_entities();
 }
 
+// Function that handles the game speed and rendering of all game objects.
+void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed)
+{
+	if (this->paused)
+		game_speed_multiplier = 0.0f;
+	for (game_object* obj : this->entitiys)
+		obj->render(camera_position, camera_front, game_speed);
+	if (this->entitiys.size() != 0)
+		this->orbit_rings->render();
+}
+
+// Function to spawn a new game object with the passed in values.
 void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location)
 {
 	this->num_entitys = this->entitiys.size();
 	long int new_entity_id = ++this->num_entitys;
 	
-	std::cout << "spawning new entity of type " << type << ". - ID: " << new_entity_id << std::endl;
+	std::cout << "Spawning new entity of type " << type << ". - ID: " << new_entity_id << std::endl;
 	game_object* new_ent = new game_object();
 
+	// Depending on the object type passed in, different shaders and obj files will be loaded:
 	switch (type) {
 	case 0: // Sun
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
-		new_ent->LoadObject("assets/objects/planets/planet.obj");
+		new_ent->load_object("assets/objects/planets/planet.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 0;
 		new_ent->orbit_speed = 0;
 		new_ent->size_adjust = 10;
-		new_ent->render_bb = true;
 		break;
 	case 1: // Planet
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
-		new_ent->LoadObject("assets/objects/planets/planet.obj");
+		new_ent->load_object("assets/objects/planets/planet.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 25;
 		new_ent->size_adjust = 5;
@@ -279,7 +259,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		break;
 	case 2: // Ship
 		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
-		new_ent->LoadObject("assets/objects/ships/ship_1/ship_1_cent.obj");
+		new_ent->load_object("assets/objects/ships/ship_1/ship_1_cent.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
@@ -287,7 +267,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		break;
 	case 3: // Holo Drive-In
 		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
-		new_ent->LoadObject("assets/objects/stations/holodrivein/holodrivein.obj");
+		new_ent->load_object("assets/objects/stations/holodrivein/holodrivein.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
@@ -295,75 +275,94 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		break;
 	case 4: // Road Start/End
 		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
-		new_ent->LoadObject("assets/objects/stations/roadgate/road_gate.obj");
+		new_ent->load_object("assets/objects/stations/roadgate/road_gate.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
 		new_ent->size_adjust = 1;
 		break;
 	default:
-		std::cout << "Error: invalid type" << std::endl;
+		std::cout << "Error: invalid type: " << type << std::endl;
 		--this->num_entitys;
+		return;
 	}
+	// Load the correct texture for the game_object based on the passed in texture_id:
 	switch (texture_id) {
 	case 0:
-		new_ent->LoadTexture("assets/textures/planets/sun.jpg");
+		new_ent->load_texture("assets/textures/planets/sun.jpg");
 		break;
 	case 1:
-		new_ent->LoadTexture("assets/textures/planets/earth.jpg");
+		new_ent->load_texture("assets/textures/planets/earth.jpg");
 		break;
 	case 2:
-		new_ent->LoadTexture("assets/textures/planets/p1.jpg");
+		new_ent->load_texture("assets/textures/planets/p1.jpg");
 		break;
 	case 3:
-		new_ent->LoadTexture("assets/textures/planets/p2.jpg");
+		new_ent->load_texture("assets/textures/planets/p2.jpg");
 		break;
 	case 4:
-		new_ent->LoadTexture("assets/textures/planets/p3.jpg");
+		new_ent->load_texture("assets/textures/planets/p3.jpg");
 		break;
 	case 5:
-		new_ent->LoadTexture("assets/textures/planets/p4.jpg");
+		new_ent->load_texture("assets/textures/planets/p4.jpg");
 		break;
 	case 6:
-		new_ent->LoadTexture("assets/objects/ships/ship_1/textures/ship_1.png");
+		new_ent->load_texture("assets/objects/ships/ship_1/textures/ship_1.png");
 		break;
 	default:
-		std::cout << "Error: invalid type" << std::endl;
+		std::cout << "Error: invalid texture id: " << texture_id << std::endl;
+		return;
 	}
+	// If the game object being spawned is a planet (not the sun), set the correct values for 
+	// its orbit speed, orbit radius, and scale adjustment:
 	float orbit_speeds[7] = { 0.05, 0.02, 0.025, 0.045, 0.09, 0.005, 0.009};
 	float size_changes[7] = {.25, 0.45, 0.35, 0.15, 0.75, 0.45, 0.30};
 	float radiuses[7] = { 80, 70, 130, 380, 98, 205, 250 };
 	if (new_entity_id > 1 && new_entity_id < 8)
 	{
 		new_ent->orbit_radius = radiuses[new_entity_id - 2];
-		new_ent->orbit_speed = orbit_speeds[this->num_entitys - 1];
+		new_ent->orbit_speed = orbit_speeds[new_entity_id - 2];
 		new_ent->size_adjust = size_changes[new_entity_id - 2];
 	}
+	// Make sure the shader loaded correctly; print out errors if any are found:
 	glUseProgram(new_ent->shader);
-
 	int success;
 	glGetShaderiv(new_ent->shader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		char infoLog[512];
 		glGetShaderInfoLog(new_ent->shader, 512, NULL, infoLog);
-		std::cout << "Shader compilation error: " << infoLog << std::endl;
+		std::cout << "Shader compilation error on entity " << new_entity_id << ": " << infoLog << std::endl;
 	}
 
+	// Give new_ent the final unique values it needs and then add it to the array of all spawned game_objects:
 	new_ent->planet_entity_id = new_entity_id;
 	new_ent->parent = parent_in;
 	new_ent->position = location;
-
 	for (game_object* obj : this->entitiys)
 		if (obj->planet_entity_id == parent_in)
 			new_ent->parent_planet = obj;
-
 	entitiys.push_back(new_ent);
-	//this->entitiys[new_entity_id].LoadObject();
 }
 
+// Function that despawns a particular game object based on its id.
+void star_maps_game::despawn_entity(int entity_id)
+{
+	long int new_entity_id = --this->num_entitys;
+	std::cout << "Attempting to despawn entity with id: " << entity_id << std::endl;
+}
+
+// Function that clears all spawned entities from the game world.
+void star_maps_game::despawn_all_entities()
+{
+	for (game_object* obj : this->entitiys) {
+		delete obj;
+	}
+}
+
+// Function to switch the camera mode from top down to spinning around the system.
 void star_maps_game::switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch)
 {
-	// 1 = top, 0 = side
+	// If passed in view_switch is 0, switch to the side 'spinning view':
 	if (view_switch == 0)
 	{
 		camera_position = glm::vec3(642.0f, 692.0f, -1220.0f);
@@ -371,6 +370,7 @@ void star_maps_game::switch_camera_mode(glm::vec3& camera_position, glm::vec3& c
 		camera_yaw = 115.0f;
 		camera_pitch = -35.0f;
 	}
+	// If passed in view_switch is 1, switch to the top down view.
 	else
 	{
 		camera_position = glm::vec3(0.0f, 1200.0f, 3.0f);
@@ -380,41 +380,43 @@ void star_maps_game::switch_camera_mode(glm::vec3& camera_position, glm::vec3& c
 	}
 }
 
-void star_maps_game::despawn_all_entities()
-{
-	for (game_object* obj : this->entitiys) {
-		delete obj;
-	}
-}
-
-void star_maps_game::despawn_entity(int entity_id)
-{
-	long int new_entity_id = --this->num_entitys;
-	std::cout << "despawning entity with id: " << entity_id << std::endl;
-}
-
-void star_maps_game::entity_manager(const glm::vec3& cameraPosition, const glm::vec3& cameraFront, float game_speed)
-{
-	if (this->paused)
-	{
-		game_speed_multiplier = 0.0f;
-	}
-	for (game_object* obj : this->entitiys) {
-		obj->Render(cameraPosition, cameraFront, game_speed);
-		if (obj->render_bb)
-			obj->RenderBoundingBox();
-	}
-
-	if (this->entitiys.size() != 0)
-		this->orbit_rings->render();
-			
-}
-
-
-void star_maps_game::close_game()
+// Function that will save the current game to the correct save file and return to the main menu.
+void star_maps_game::save_and_return_to_menu()
 {
 	save_game();
+	exit(0);
+	// To-Do: change exit(0) to function to return to main menu.
+}
 
-	// close main window
-	//star_maps
+// Function that will close the app completely without saving the game data.
+void star_maps_game::close_game()
+{
+	exit(0);
+}
+
+
+// Function to convert text value of difficulty to an integer.
+int diff_text_to_int(std::string diff)
+{
+	if (diff == "easy")
+		return 1;
+	else if (diff == "medium")
+		return 2;
+	else if (diff == "hard")
+		return 3;
+	else
+		return 4;
+}
+
+// Function to convert int value of difficulty to a string.
+std::string diff_int_to_text(int diff)
+{
+	if (diff == 1)
+		return "easy";
+	else if (diff == 2)
+		return "medium";
+	else if (diff == 3)
+		return "hard";
+	else
+		return "dev";
 }

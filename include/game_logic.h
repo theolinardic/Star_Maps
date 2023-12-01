@@ -16,46 +16,42 @@
 #include <objects.h>
 #include <player.h>
 
+#define SETTINGS_FILE_LOCATION "settings.json"
+
+using json = nlohmann::json;
+
 class star_maps_game
 {
 public:
-	float game_speed_multiplier;
-	bool paused;
-	bool loaded_save;
-
-	int num_entitys;
+	float game_speed_multiplier, player_money;
+	bool paused, loaded_save;
+	int num_entitys, current_save_idx;
 	std::vector<game_object*> entitiys;
 	rings* orbit_rings;
-
-	int current_save_idx;
 	std::string current_save_name;
-	float player_money;
-	int sols_passed;
-	int in_game_hour;
-	int in_game_minute;
+	int in_game_hour, in_game_minute, sols_passed;
 	float in_game_second;
-	int total_played_hour;
-	int total_played_minute;
+	int total_played_hour, total_played_minute;
 	float total_played_second;
-	//1=easy, 2=medium, 3=hard
-	int difficulty;
-	float status_1_percent;
-	float status_2_percent;
-	float status_3_percent;
+	int difficulty; // 1 = Easy, 2 = Medium, 3 = Hard.
+	float status_1_percent, status_2_percent, status_3_percent;
 
 	star_maps_game(bool p);
 	void reset_settings();
-	nlohmann::json get_settings();
-	void change_setting(const std::string setting, const nlohmann::json new_value);
-	void update_debug_ingame_clock(float time_to_add);
-	void give_money(int amount);
+	json get_settings();
+	void change_setting(const std::string setting, const json new_value);
 	void load_save(int index);
 	void save_game();
-	void entity_manager(const glm::vec3& cameraPosition, const glm::vec3& cameraFront, float game_speed);
+	void give_money(int amount);
+	void update_debug_ingame_clock(float time_to_add);
+	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed);
 	void spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location);
 	void despawn_entity(int entity_id);
-	void close_game();
 	void despawn_all_entities();
-	void check_click(glm::vec3 camera_position, glm::vec3 mouse_pos);
 	void switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch);
+	void save_and_return_to_menu();
+	void close_game();
 };
+
+int diff_text_to_int(std::string diff);
+std::string diff_int_to_text(int diff);

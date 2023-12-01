@@ -1,142 +1,132 @@
 #include <objects.h>
 
+// Class initialization function for game objects.
 game_object::game_object()
 {
     this->VAO = 0;
     this->EBO = 0;
     this->VBO = 0;
-    this->indicesCount = 0;
-    this->textureID = 2;
+    this->indices_count = 0;
+    this->textureID = 0;
     this->last_frame_time = glfwGetTime();
     this->time_exist = 0.0;
     this->rotation_speed = 0.5;
     this->position = glm::vec3(0.0, 0.0, 0.0);
-    this->render_bb;
+    this->render_bb = false;
 }
 
-
-void game_object::LoadObject(const char* objFilePath) {
+// Function to load obj files for game objects using Assimp.
+void game_object::load_object(const char* obj_file) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(objFilePath, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices);
+    const aiScene* scene = importer.ReadFile(obj_file, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cout << "Assimp error: " << importer.GetErrorString() << std::endl;
+        std::cout << "Error loading obj: " << obj_file << ". Assimp error: " << importer.GetErrorString() << std::endl;
         return;
     }
 
-    aiMesh* mesh = scene->mMeshes[0]; // Assuming there's only one mesh in the file
-
-    std::vector<GLfloat> vertices; // Combined buffer for vertices (positions, UVs, normals)
+    aiMesh* mesh = scene->mMeshes[0];
+    std::vector<GLfloat> buffer; // Combined buffer for vertices, UVs, normals
     std::vector<GLuint> indices;   // Indices buffer
-    std::vector<GLfloat> verticesCopy;
+    std::vector<GLfloat> vertices;
 
-    // Process mesh data
+    // Load all data from the mesh:
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         aiVector3D vertex = mesh->mVertices[i];
+        buffer.push_back(vertex.x);
+        buffer.push_back(vertex.y);
+        buffer.push_back(vertex.z);
         vertices.push_back(vertex.x);
         vertices.push_back(vertex.y);
         vertices.push_back(vertex.z);
-        verticesCopy.push_back(vertex.x);
-        verticesCopy.push_back(vertex.y);
-        verticesCopy.push_back(vertex.z);
 
         aiVector3D uv = mesh->mTextureCoords[0][i];
-        vertices.push_back(uv.x);
-        vertices.push_back(uv.y);
-
-        if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f) {
-            std::cout << "Out-of-range UV: (" << uv.x << ", " << uv.y << ")" << std::endl;
-        }
+        buffer.push_back(uv.x);
+        buffer.push_back(uv.y);
 
         if (mesh->HasNormals()) {
             aiVector3D normal = mesh->mNormals[i];
-            vertices.push_back(normal.x);
-            vertices.push_back(normal.y);
-            vertices.push_back(normal.z);
+            buffer.push_back(normal.x);
+            buffer.push_back(normal.y);
+            buffer.push_back(normal.z);
         }
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; ++j) {
+        for (unsigned int j = 0; j < face.mNumIndices; ++j)
             indices.push_back(face.mIndices[j]);
-        }
     }
 
-    // Create and bind VAO
+    // Set up the game objects rendering through the VAO, VBO, and EBO. Pass in the vertices, normals, uvs
+    // and indices to the buffers:
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
-
-    // Vertices buffer (positions, UVs, normals)
     glGenBuffers(1, &this->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW);
-
-    // Indices buffer
+    glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(GLfloat), &buffer[0], GL_STATIC_DRAW);
     glGenBuffers(1, &this->EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
-    // Position attribute (from combined vertices buffer)
+    // Set the attribute pointers for the buffer as it contains vertices, normals, and uvs all in one array:
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-
-    // UVS attribute (from combined vertices buffer)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-
-    // Normals attribute (from combined vertices buffer)
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(GLfloat)));
 
-    boundingBoxMin = glm::vec3(std::numeric_limits<float>::max());
-    boundingBoxMax = glm::vec3(-std::numeric_limits<float>::max());
-
-    for (unsigned int i = 0; i < verticesCopy.size(); i += 3) {
-        glm::vec3 vertex(verticesCopy[i], verticesCopy[i + 1], verticesCopy[i + 2]);
-        boundingBoxMin = glm::min(boundingBoxMin, vertex);
-        boundingBoxMax = glm::max(boundingBoxMax, vertex);
+    // Create an empty bounding box and then find the correct opposite corners for the bounding box
+    // based on the smallest and largest values in the vertices (positions) array:
+    this->boundingBoxMin = glm::vec3(0.0f);
+    this->boundingBoxMax = glm::vec3(0.0f);
+    for (int i = 0; i < vertices.size(); i += 3) {
+        glm::vec3 vertex(vertices[i], vertices[i + 1], vertices[i + 2]);
+        this->boundingBoxMin = glm::min(this->boundingBoxMin, vertex);
+        this->boundingBoxMax = glm::max(this->boundingBoxMax, vertex);
     }
+    
+    // Save the number of indices and a copy of the objects vertices to the game object
+    // (the copy is used later when finding the center of the objects vertices):
+    this->indices_count = indices.size();
+    this->obj_verts = vertices;
 
-    this->indicesCount = indices.size();
-    this->obj_verts = verticesCopy;
-    // Debug print to check vertices and UVs after loading and processing obj files.
-    std::cout << "Number of Vertices: " << vertices.size() / 8 << std::endl;
+    // Debug print to check vertices and indices counts after loading and processing obj files:
+    std::cout << "Number of Vertices: " << buffer.size() / 8 << std::endl;
     std::cout << "Number of Indices: " << indices.size() / 3 << std::endl;
-
 }
 
-void game_object::LoadTexture(const char* textureFilePath) {
+// Function to load a texture file and save it to the game object using SOIL2.
+void game_object::load_texture(const char* texture_file) {
+    // Generate a new texture and bind it to the game objects texture_id:
     glGenTextures(1, &this->textureID);
     glBindTexture(GL_TEXTURE_2D, this->textureID);
 
+    // Set some basic parameters for the texture to keep it looking (hopefully) clean:
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    // Use SOIL2 to load the texture into OpenGL and generate a Mipmap for it:
     int width, height, nrChannels;
-    unsigned char* data = SOIL_load_image(textureFilePath, &width, &height, &nrChannels, 0);
+    unsigned char* data = SOIL_load_image(texture_file, &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-
         SOIL_free_image_data(data);
     }
     else
-        std::cout << "Failed to load texture: " << textureFilePath << std::endl;
+        std::cout << "Failed to load texture: " << texture_file << std::endl;
 }
 
-void game_object::teleport(glm::vec3 new_pos)
-{
-    this->position = new_pos;
-}
-
+// Function to get the center position of a game object.
 glm::vec3 game_object::get_center() {
     glm::vec3 center(0.0f);
-    unsigned int vertexCount = this->obj_verts.size() / 3;
+    int vertexCount = this->obj_verts.size() / 3;
 
-    for (unsigned int i = 0; i < this->obj_verts.size(); i += 3) {
+    for (int i = 0; i < this->obj_verts.size(); i += 3) {
         center.x += this->obj_verts[i];
         center.y += this->obj_verts[i + 1];
         center.z += this->obj_verts[i + 2];
@@ -148,11 +138,12 @@ glm::vec3 game_object::get_center() {
     return center;
 }
 
+// Function to get the radius of a game object.
 float game_object::get_radius() {
-    glm::vec3 center = get_center();
+    glm::vec3 center = this->get_center();
     float maxDistance = 0.0f;
 
-    for (unsigned int i = 0; i < this->obj_verts.size(); i += 3) {
+    for (int i = 0; i < this->obj_verts.size(); i += 3) {
         float distance = glm::distance(center, glm::vec3(this->obj_verts[i], this->obj_verts[i + 1], this->obj_verts[i + 2]));
         if (distance > maxDistance)
             maxDistance = distance;
@@ -160,201 +151,229 @@ float game_object::get_radius() {
     return maxDistance;
 }
 
-void game_object::Render(const glm::vec3& cameraPosition, const glm::vec3& cameraFront, float game_speed)
+// Function to render the game object. Will be called in the main game entity manager render loop.
+void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed)
 {
     // Initialize debug menu reference:
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui::Text("%d %f %f %f", this->planet_entity_id, this->position.x, this->position.y, this->position.z);
 
-    // Update the time the object has existing so that rotation can be adjusted accordingly and rotate the object around the Y and Z axis.
+    // Update the time the object has existed:
     this->time_exist += (glfwGetTime() - last_frame_time) * game_speed;
     this->last_frame_time = glfwGetTime();
     
-    // Bind correct VAO and shader for the current object:
+    // Bind VAO and shader for the current object:
     glBindVertexArray(this->VAO);
     glUseProgram(this->shader);
 
-    // Initialize an the model matrix of changes to be made to the object and start by adding the size adjustment.
-    glm::mat4 modelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(this->size_adjust));
-    glm::vec3 orbitCenter;
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f));
+    // Initialize the model matrix of changes to be made to the object with the scale adjustment:
+    glm::mat4 model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(this->size_adjust));
 
-
-    // Sun should not orbit...
+    // Every object will orbit around its parent object. (Besides the sun, hence why I start at entity 2) Here is where the 
+    // new position of each object on its orbit path is calculated:
     if (this->planet_entity_id > 1)
     {
-        glm::vec3 parentPlanetCenter = this->parent_planet->get_center();
-        glm::vec4 parentPlanetCenter4(parentPlanetCenter.x, parentPlanetCenter.y, parentPlanetCenter.z, 1.0f);
+        // Find the center of the objects parent:
+        glm::vec3 parent_planet_center = this->parent_planet->get_center();
 
-        float orbitX = parentPlanetCenter4.x + this->orbit_radius * cos(this->time_exist * this->orbit_speed);
-        float orbitY = parentPlanetCenter4.y; // Assuming the orbit is on the same Y-level as the parent planet
-        float orbitZ = parentPlanetCenter4.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
+        // Find the distance along the orbit path it should be based on the time it has existed (keeps track of 
+        // if the game is paused, basically) and the orbit speed of each object:
+        this->position.x = parent_planet_center.x + this->orbit_radius * cos(this->time_exist * this->orbit_speed);
+        this->position.y = parent_planet_center.y;
+        this->position.z = parent_planet_center.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
 
-        this->position.x = orbitX;
-        this->position.y = orbitY;
-        this->position.z = orbitZ;
-
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(orbitX, orbitY, orbitZ));
-        modelMatrix = this->parent_planet->parent_mm * modelMatrix;
-        orbitCenter = glm::vec3(parentPlanetCenter4.x, parentPlanetCenter4.y, parentPlanetCenter4.z);
+        // Apply the translation to the model matrix and then multiply by the model matrix of its parent
+        // so we can achieve accurate sub rotations (i.e. a space station orbiting around a planet that is orbiting the sun):
+        model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
+        model_matrix = this->parent_planet->parent_mm * model_matrix;
     }
 
-    // Add rotation/spinning for all planets:
+    // Add rotation/spinning for all planets (any object higher than entity id 7 will be spawned after the planets):
     if (this->planet_entity_id < 8)
-        modelMatrix = rotationMatrix * modelMatrix;
+        model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
 
+    // Find the view matrix and projection with the passed in camera position and camera front references:
     float fov = 45.0f;
-    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraFront, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+    glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 projection_matrix = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
-    // Pass matrices to the shader
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniform1f(glGetUniformLocation(this->shader, "rotation_angle"), (glm::radians(this->time_exist)));
-    //glUniformMatrix4fv(glGetUniformLocation(this->shader, "translate"), 1, GL_FALSE, glm::value_ptr(this->position));
+    // Pass matrices to the objects shader:
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
 
-   // this->position = abs(glm::vec3(orbitX, orbitY, orbitZ) - this->position);
-
+    // Load the objects texture and draw the object:
     glBindTexture(GL_TEXTURE_2D, this->textureID);
+    glDrawElements(GL_TRIANGLES, this->indices_count, GL_UNSIGNED_INT, 0);
 
-    // Draw the object
-    glDrawElements(GL_TRIANGLES, this->indicesCount, GL_UNSIGNED_INT, 0);
+    // Update references of the game object so that sub orbiting objects can find their positions correctly:
+    this->parent_mm = model_matrix;
+    this->view_matrix = view_matrix;
+    this->projection_matrix = projection_matrix;
+    this->model_matrix = model_matrix;
+    this->position = model_matrix[3];
 
-    this->parent_mm = modelMatrix;
-
-    this->vm = viewMatrix;
-    this->pm = projectionMatrix;
-    this->mm = modelMatrix;
-    this->position = modelMatrix[3];
+    // Render the objects bounding box if needed:
+    if (this->render_bb)
+        this->render_bounding_box();
 }
 
-
-void game_object::delete_object()
-{
-    free(this);
-}
-
-void game_object::RenderBoundingBox() {
-    // Generate the bounding box vertices for a wireframe box
-    std::vector<GLfloat> boundingBoxVertices = {
+// Function to render the bounding box for a game object.
+void game_object::render_bounding_box() {
+    // Vertices for the objects bounding box cube:
+    std::vector<GLfloat> bb_vertices = {
         // Bottom face
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
-
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
-
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
-
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
 
         // Top face
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
-
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
-
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
-
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
 
         // Side edges
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMin.z,
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMin.z,
-
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMin.z,
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMin.z,
-
         boundingBoxMax.x, boundingBoxMin.y, boundingBoxMax.z,
         boundingBoxMax.x, boundingBoxMax.y, boundingBoxMax.z,
-
         boundingBoxMin.x, boundingBoxMin.y, boundingBoxMax.z,
         boundingBoxMin.x, boundingBoxMax.y, boundingBoxMax.z,
     };
 
-    // Generate VAO and VBO for the bounding box
-    GLuint bboxVAO, bboxVBO;
-    glGenVertexArrays(1, &bboxVAO);
-    glBindVertexArray(bboxVAO);
-
-    glGenBuffers(1, &bboxVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, bboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, boundingBoxVertices.size() * sizeof(GLfloat), &boundingBoxVertices[0], GL_STATIC_DRAW);
-
-    // Configure vertex attributes
+    // Set up, draw, and clean up the bounding box render:
+    GLuint bb_VAO, bb_VBO;
+    // Reuse the game objects shader for simplicity/memory sake, bounding box will roughly same color as the game objects texture:
+    glUseProgram(this->shader);
+    glGenVertexArrays(1, &bb_VAO);
+    glBindVertexArray(bb_VAO);
+    glGenBuffers(1, &bb_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, bb_VBO);
+    glBufferData(GL_ARRAY_BUFFER, bb_vertices.size() * sizeof(GLfloat), &bb_vertices[0], GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // Render the bounding box
-    glUseProgram(this->shader);  // Use the correct shader program
-
-    glBindVertexArray(bboxVAO);
-    glDrawArrays(GL_LINES, 0, boundingBoxVertices.size() / 3);
-
-    // Clean up
+    glDrawArrays(GL_LINES, 0, bb_vertices.size() / 3);
     glBindVertexArray(0);
-    glDeleteVertexArrays(1, &bboxVAO);
-    glDeleteBuffers(1, &bboxVBO);
+    glDeleteVertexArrays(1, &bb_VAO);
+    glDeleteBuffers(1, &bb_VBO);
 }
 
-
-
+// Class initialization function for orbit path rings.
 rings::rings() {
-    // Load shader, create VAO, VBO, and set up vertices for a single ring
     this->shader = load_shader("shaders/orbit_rings/vert.glsl", "shaders/orbit_rings/frag.glsl");
     glUseProgram(this->shader);
 
-    // Generate VAO and VBO
+    // Set up orbit path rings VAO and VBO:
     glGenVertexArrays(1, &this->VAO);
-    glGenBuffers(1, &this->VBO);
-
-    // Bind VAO and VBO
     glBindVertexArray(this->VAO);
+    glGenBuffers(1, &this->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 
-    // Vertices for a single ring
+    // Define the vertices for an orbit ring:
     std::vector<float> vertices;
     for (int j = 0; j < 360; j++) {
-        float degInRad = j * PI / 180;
-        vertices.push_back(cos(degInRad));
-        vertices.push_back(sin(degInRad));
-        vertices.push_back(0.0f); // Z-coordinate is 0 for now
+        float deg = j * 3.14159265359f / 180;
+        vertices.push_back(cos(deg));
+        vertices.push_back(sin(deg));
+        vertices.push_back(0.0f);
     }
 
-    // Fill VBO with vertex data
+    // Fill VBO with vertex data:
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    // Set vertex attribute pointers
+    // Set vertex attribute pointer:
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Unbind VAO and VBO
+    // Clean up:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
+// Function to render the orbit path rings.
 void rings::render()
 {
     glBindVertexArray(this->VAO);
     glLineWidth(1.0f);
 
-    float radiuses[7] = { 400.0 , 645.0, 900.0, 1140.0, 1485.0, 1850.0 };
+    // Radiuses for the orbit path ring positions:
+    float radiuses[7] = { 200.0 , 322.5, 450.0, 570.0, 742.5, 925.0 };
 
-    // Incremental scaling for each ring
-    float scaleFactor = 1.0f;
+    // Apply the correct translations for each of the seven rings and draw it:
     for (int i = 0; i < 6; i++)
     {
-        glm::mat4 modelorb = glm::mat4(1);
-        modelorb = glm::translate(modelorb, glm::vec3(0.0f, 0.0f, 0.0f));
-        modelorb = glm::rotate(modelorb, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        modelorb = glm::scale(modelorb, glm::vec3(radiuses[i] * 0.5f, radiuses[i] * 0.5f, radiuses[i] * 0.5f));
-        glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(modelorb));
+        glm::mat4 model = glm::mat4(1);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(radiuses[i], radiuses[i], radiuses[i]));
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_LINE_LOOP, 0, 360);
     }
+}
+
+// Function to read in the text of a shader file.
+GLchar* read_shader_text(const char* file_path)
+{
+    FILE* shader_file;
+    errno_t error = fopen_s(&shader_file, file_path, "rb");
+    if (error == '0' || !shader_file)
+    {
+        std::cout << "Error in opening shader: " << file_path << "." << std::endl;
+        fclose(shader_file);
+        return NULL;
+    }
+    // Find the length of the shader file and allocate memory to the shader char array:
+    fseek(shader_file, 0, SEEK_END);
+    long int file_len = ftell(shader_file);
+    rewind(shader_file);
+    GLchar* shader_content = (GLchar*)malloc(file_len + 1);
+
+    // Read the contents of the shader file, remove the empty char at the end, close the file, and return the text:
+    fread(shader_content, 1, file_len, shader_file);
+    fclose(shader_file);
+    shader_content[file_len] = '\0';
+    return shader_content;
+}
+
+// Function to load vertex and fragment shaders.
+GLuint load_shader(const char* vertex_file_path, const char* frag_file_path)
+{
+    // Load in text from the frag and vertex shaders:
+    GLchar* vertex_shader_content = read_shader_text(vertex_file_path);
+    GLchar* frag_shader_content = read_shader_text(frag_file_path);
+
+    // Create the vertex shader in OpenGL, pass it the correct source file, compile it, and free the char array of the input file:
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_content, NULL);
+    glCompileShader(vertex_shader);
+    free(vertex_shader_content);
+
+    // Repeat for frag shader:
+    GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &frag_shader_content, NULL);
+    glCompileShader(fragment_shader);
+    free(frag_shader_content);
+
+    // Create shader program with the now compiled vertex and fragment shaders:
+    GLuint shader_program = glCreateProgram();
+    glAttachShader(shader_program, vertex_shader);
+    glAttachShader(shader_program, fragment_shader);
+    glLinkProgram(shader_program);
+
+    // Delete the old individual vertex and fragment shaders and return the compiled shader program:
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    return shader_program;
 }

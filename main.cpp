@@ -10,22 +10,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <json.hpp>
-// Below  are original source files for Star Maps:
+// Below are original source files for Star Maps:
 #include <objects.h>
 #include <generate_map.h>
 #include <player.h>
 #include <game_logic.h>
 #include <hud_control.h>
 
-GLfloat lineVertices[] = {
-	// Two points for the line (change as per your needs)
-	0.0f, 0.0f,
-	0.5f, 0.5f
-};
-
 int main()
 {
-	// Initialize GLFW window using function from generateMap.cpp.
+	// Initialize GLFW window:
 	GLFWwindow* star_maps_window = initialize_glfw_window();
 	glEnable(GL_DEPTH_TEST);
 	glfwSwapBuffers(star_maps_window);
@@ -33,61 +27,62 @@ int main()
 	// Create skybox:
 	skybox SB = skybox();
 
-	// Set up camera variables:
+	// Set up camera:
 	glm::vec3 camera_position = glm::vec3(642.0f, 692.0f, -1220.0f);
 	glm::vec3 camera_front = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
 	float camera_yaw = 115.0f;
 	float camera_pitch = -35.0f;
 
+	// Start ImGUI Dev Tools and start recording the time the app has been open and the game unpaused:
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	float launch_time = glfwGetTime();
 	float last_frame_time = glfwGetTime();
 	float awake_time = 0;
 
-	// Start the brain of the game with the core logic.
+	// Start the brain of the game:
 	star_maps_game star_maps = star_maps_game(false);
-
-	HUD game_ui = HUD();
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
 	{
-		if (!star_maps.paused)
-		{
-			awake_time += (glfwGetTime() - last_frame_time);
-		}
-		// Tells GLFW to check for new events and process them.
-		glfwPollEvents();
+		// Clear OpenGL buffers:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Render new frame of debug tools at the start of every opengl/glfw frame.
+		// Update the timer for how long game has been unpaused:
+		if (!star_maps.paused)
+			awake_time += (glfwGetTime() - last_frame_time);
+
+		// Tells GLFW to check for new events (such as mouse/keyboard inputs) and process them:
+		glfwPollEvents();
+
+		// Render new frame of debug tools at the start of every frame:
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// Aadd to the in game counter to increase sol/clock via debug menu in game logic class.
+		// Give core game logic the time passed since the last frame for its debug tools:
 		star_maps.update_debug_ingame_clock(glfwGetTime() - last_frame_time);
 		last_frame_time = glfwGetTime();
-		// Don't read game input if mouse is interacting with debug dools.
+
+
 		glm::vec3 front;
 		front.x = cos(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
 		front.y = sin(glm::radians(camera_pitch));
 		front.z = sin(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
 		camera_front = glm::normalize(front);
 
+		// Don't read GLFW window input if mouse is interacting with debug tools, otherwise handle all player inputs in player.cpp:
 		if (!io.WantCaptureMouse)
-		{
-			glm::vec3 check_item = read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
-		}
+			read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
 
+		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);
 		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
 		
+		// Create elements for the debug tools and render them to the screen:
 		float time_open_sec = glfwGetTime() - launch_time;
 		int time_open_min = time_open_sec / 60;
-
-		// Create elements for the debug tools to displa and render them to the screen.
 		ImGui::Begin("Debug Window");
 		if (time_open_min >= 1)
 			ImGui::Text("Time open: %dm %.1fs", time_open_min, (time_open_sec - (60 * time_open_min)));
@@ -100,25 +95,19 @@ int main()
 		ImGui::Text("Camera Rot Y: %f", front.y);
 		ImGui::Text("Camera Rot Y: %f", front.z);
 		ImGui::Checkbox("Paused", &star_maps.paused);
-		if (ImGui::Button("Camera Top"))
-		{
+		if (ImGui::Button("Switch Camera View - Top"))
 			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 1);
-		}
-		if (ImGui::Button("Camera Side"))
-		{
+		if (ImGui::Button("Switch Camera View - Side"))
 			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 0);
-		}
 		ImGui::End();
 		ImGui::Render();
 		if (show_debug)
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	//	game_ui.render();
-
 		glfwSwapBuffers(star_maps_window);
 	}
 
-	// ImGui Dev UI and GLFW Clean Up at the end of program.
+	// Clean up ImGui debug tools and GLFW window at the end of the program:
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
