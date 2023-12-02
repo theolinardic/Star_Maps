@@ -582,3 +582,14 @@ std::string diff_int_to_text(int diff)
 	else
 		return "dev";
 }
+
+// Function to change between fullscreen and windowed mode.
+void switch_display_type(GLFWwindow* window, bool fullscreen)
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
+	if (fullscreen)
+		glfwSetWindowMonitor(window, monitor, 0, 0, monitor_settings->width, monitor_settings->height, monitor_settings->refreshRate);
+	else
+		glfwSetWindowMonitor(window, nullptr, 0, 30, monitor_settings->width, monitor_settings->height - 71, monitor_settings->refreshRate);
+}

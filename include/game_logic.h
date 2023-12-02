@@ -64,3 +64,5 @@ public:
 
 int diff_text_to_int(std::string diff);
 std::string diff_int_to_text(int diff);
+
+void switch_display_type(GLFWwindow* window, bool fullscreen);

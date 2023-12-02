@@ -11,11 +11,27 @@
 #include <SOIL2/SOIL2.h>
 #include <objects.h>
 
+class element
+{
+public:
+	int ui_id;
+	GLuint texture_id, VAO, VBO, EBO, shader;
+	float aspect_ratio;
+	bool should_render;
+
+	element(int id);
+	void switch_img(int new_status);
+	void render(glm::vec3 camera_position, glm::vec3 camera_front);
+};
+
 class HUD
 {
 public:
-	GLuint tiles_texture_id, tools_texture_id, progress_bars_texture_id, time_bar_texture_id, VAO, VBO, EBO, shader;
+	std::vector<element*> all_elements;
+	bool should_render;
 
 	HUD();
+	void add_element(int element_id);
+	void update_element(int element_id, int new_status);
 	void render(glm::vec3 camera_position, glm::vec3 camera_front);
 };

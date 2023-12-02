@@ -48,6 +48,9 @@ int main()
 	star_maps_game star_maps = star_maps_game(false);
 
 	HUD* game_ui = new HUD();
+	int screenWidth, screenHeight;
+	double fps;
+	bool fullscreen = true;
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
@@ -58,6 +61,22 @@ int main()
 		// Update the timer for how long game has been unpaused:
 		if (!star_maps.paused)
 			awake_time += (glfwGetTime() - last_frame_time);
+
+		double currentTime = glfwGetTime();
+		static int frameCount = 0;
+		static double lastTime = 0.0;
+		frameCount++;
+		if (currentTime - lastTime >= 1.0) {
+			fps = static_cast<double>(frameCount) / (currentTime - lastTime);
+			frameCount = 0;
+			lastTime = currentTime;
+		}
+
+		glfwGetFramebufferSize(star_maps_window, &screenWidth, &screenHeight);
+
+		std::string window_head = "Star Maps v0.35: " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight)
+			+ " - FPS: " + std::to_string(static_cast<int>(fps));
+		glfwSetWindowTitle(star_maps_window, window_head.c_str());
 
 		// Tells GLFW to check for new events (such as mouse/keyboard inputs) and process them:
 		glfwPollEvents();
@@ -91,6 +110,7 @@ int main()
 		float time_open_sec = glfwGetTime() - launch_time;
 		int time_open_min = time_open_sec / 60;
 		ImGui::Begin("Debug Window");
+		ImGui::Text("Window: %dx%d %.2f FPS", screenWidth, screenHeight, static_cast<float>(fps));
 		if (time_open_min >= 1)
 			ImGui::Text("Time open: %dm %.1fs", time_open_min, (time_open_sec - (60 * time_open_min)));
 		else
@@ -106,6 +126,10 @@ int main()
 			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 1);
 		if (ImGui::Button("Switch Camera View - Side"))
 			star_maps.switch_camera_mode(camera_position, camera_front, camera_yaw, camera_pitch, 0);
+		if (ImGui::Button("Fullscreen"))
+			switch_display_type(star_maps_window, true);
+		if (ImGui::Button("Windowed"))
+			switch_display_type(star_maps_window, false);
 		ImGui::End();
 		ImGui::Render();
 		if (show_debug)

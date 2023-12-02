@@ -16,9 +16,15 @@ GLFWwindow* initialize_glfw_window(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
+	// Get the primary monitor
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+
+	// Get the video mode of the primary monitor
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+
 	// Generate GLFW window:
 	// TO-DO: Update first null value to what should_fullscreen is.
-	GLFWwindow* star_maps_window = glfwCreateWindow(res_width, res_height, WINDOW_NAME, NULL, NULL);
+	GLFWwindow* star_maps_window = glfwCreateWindow(mode->width, mode->height, "Star Maps", primaryMonitor, nullptr);
 
 	// Check to make sure window successfully opened:
 	if (star_maps_window == NULL)
