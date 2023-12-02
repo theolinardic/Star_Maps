@@ -21,8 +21,12 @@ int main()
 {
 	// Initialize GLFW window:
 	GLFWwindow* star_maps_window = initialize_glfw_window();
-	glEnable(GL_DEPTH_TEST);
 	glfwSwapBuffers(star_maps_window);
+	glEnable(GL_DEPTH_TEST);
+
+	// These lines allow textures to keep their transparent backgrounds (useful for HUD):
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Create skybox:
 	skybox SB = skybox();
@@ -42,6 +46,8 @@ int main()
 
 	// Start the brain of the game:
 	star_maps_game star_maps = star_maps_game(false);
+
+	HUD* game_ui = new HUD();
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
@@ -78,8 +84,9 @@ int main()
 
 		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);
+		game_ui->render(camera_position, camera_front);
 		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
-		
+
 		// Create elements for the debug tools and render them to the screen:
 		float time_open_sec = glfwGetTime() - launch_time;
 		int time_open_min = time_open_sec / 60;

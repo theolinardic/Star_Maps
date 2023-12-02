@@ -17,5 +17,5 @@ public:
 	GLuint tiles_texture_id, tools_texture_id, progress_bars_texture_id, time_bar_texture_id, VAO, VBO, EBO, shader;
 
 	HUD();
-	void render();
+	void render(glm::vec3 camera_position, glm::vec3 camera_front);
 };

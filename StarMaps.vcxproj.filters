@@ -40,6 +40,9 @@
     <Filter Include="Source Files\Shader Files\Orbit Rings">
       <UniqueIdentifier>{9f643032-ac08-46e4-acbd-c6b5e09ec06d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shader Files\ui_elements">
+      <UniqueIdentifier>{7f9340d3-bec0-4c44-9ca5-157a450b1a8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -177,6 +180,12 @@
     </None>
     <None Include="shaders\orbit_rings\vert.glsl">
       <Filter>Source Files\Shader Files\Orbit Rings</Filter>
+    </None>
+    <None Include="shaders\ui_elements\frag.glsl">
+      <Filter>Source Files\Shader Files\ui_elements</Filter>
+    </None>
+    <None Include="shaders\ui_elements\vert.glsl">
+      <Filter>Source Files\Shader Files\ui_elements</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

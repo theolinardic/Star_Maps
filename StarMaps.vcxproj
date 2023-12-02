@@ -191,6 +191,8 @@
     <None Include="shaders\skybox\vert.glsl" />
     <None Include="shaders\Sun\frag.glsl" />
     <None Include="shaders\Sun\vert.glsl" />
+    <None Include="shaders\ui_elements\frag.glsl" />
+    <None Include="shaders\ui_elements\vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\textures\planets\planet_test_texture.png" />
