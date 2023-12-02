@@ -100,7 +100,7 @@ int main()
 
 		// Don't read GLFW window input if mouse is interacting with debug tools, otherwise handle all player inputs in player.cpp:
 		if (!io.WantCaptureMouse)
-			read_player_input(star_maps_window, game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys, last_frame_down);
+			read_player_input(star_maps_window, star_maps.paused, star_maps.game_speed_multiplier,  game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys, last_frame_down);
 
 		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_PRESS)
 			last_frame_down = 3;

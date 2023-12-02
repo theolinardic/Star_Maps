@@ -5,7 +5,7 @@ float movement_speed = 1.0f;
 bool show_debug = true;
 
 // Function to read player input and act based on it:
-void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys, int& last_frame_down)
+void read_player_input(GLFWwindow* star_maps_window, bool& paused, float& game_speed, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys, int& last_frame_down)
 {
 	if (glfwGetKey(star_maps_window, GLFW_KEY_W) == GLFW_PRESS) // Move forward
 		camera_position += movement_speed * camera_front;
@@ -42,7 +42,7 @@ void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& ca
 		else if (mx > 1167 && mx < 1292 && my > 957 && my < 1067) // save tool
 			game_ui->update_element(1, 0);
 		else if (mx > 1320 && mx < 1445 && my > 957 && my < 1067) // exit tool
-			game_ui->update_element(1, 0);
+			glfwSetWindowShouldClose(star_maps_window, 1);
 		else if (mx > 100 && mx < 155 && my > 950 && my < 1005) // tile 1
 			game_ui->update_element(0, 0);
 		else if (mx > 197 && mx < 251 && my > 950 && my < 1005) // tile 2
@@ -68,11 +68,26 @@ void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& ca
 		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070) // tile 12
 			game_ui->update_element(0, 0);
 		else if (mx > 1145 && mx < 1166 && my >= 0 && my < 25) // pause
+		{
+			paused = true;
 			game_ui->update_element(3, 1);
+		}
 		else if (mx > 1186 && mx < 1208 && my >= 0 && my < 25) // play
+		{
+			paused = false;
+			game_speed = 1.0f;
 			game_ui->update_element(3, 2);
+		}
 		else if (mx > 1220 && mx < 1245 && my >= 0 && my < 25) // ffwd
+		{
+			if (paused)
+			{
+				paused = false;
+				game_speed = 1.0f;
+			}
+			game_speed *= 2.0f;
 			game_ui->update_element(3, 3);
+		}	
 	}
 
 	// Clamp the camera pitch to keep it oriented correctly:

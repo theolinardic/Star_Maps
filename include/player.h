@@ -18,4 +18,4 @@ extern float movement_speed;
 extern float sensitivity;
 extern bool show_debug;
 
-void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys, int& last_frame_down);
+void read_player_input(GLFWwindow* star_maps_window, bool& paused, float& game_speed, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys, int& last_frame_down);
