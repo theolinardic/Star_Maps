@@ -27,8 +27,9 @@ public:
     std::vector<GLfloat> obj_verts;
     std::string name;
     GLuint VAO, VBO, EBO, textureID, shader;
+    GLFWwindow* window;
 
-    game_object();
+    game_object(GLFWwindow* window);
     void load_object(const char* obj_file);
     void load_texture(const char* texture_file);
     glm::vec3 get_center();
@@ -42,7 +43,7 @@ class rings
 public:
     GLuint shader, VAO, VBO;
     rings();
-    void render();
+    void render(const glm::vec3& camera_position, const glm::vec3& camera_front);
 };
 
 GLchar* read_shader_text(const char* file_path);

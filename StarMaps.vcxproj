@@ -183,6 +183,8 @@
     <None Include="shaders\default\vert.glsl" />
     <None Include="shaders\orbit_rings\frag.glsl" />
     <None Include="shaders\orbit_rings\vert.glsl" />
+    <None Include="shaders\placing_item\frag.glsl" />
+    <None Include="shaders\placing_item\vert.glsl" />
     <None Include="shaders\planets\frag.glsl" />
     <None Include="shaders\planets\vert.glsl" />
     <None Include="shaders\ships\frag.glsl" />

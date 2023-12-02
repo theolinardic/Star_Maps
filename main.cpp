@@ -45,7 +45,7 @@ int main()
 	float awake_time = 0;
 
 	// Start the brain of the game:
-	star_maps_game star_maps = star_maps_game(false);
+	star_maps_game star_maps = star_maps_game(false, star_maps_window);
 
 	HUD* game_ui = new HUD();
 	int screenWidth, screenHeight;
@@ -102,6 +102,14 @@ int main()
 		if (!io.WantCaptureMouse)
 			read_player_input(star_maps_window, game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys, last_frame_down);
 
+		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_PRESS)
+			last_frame_down = 3;
+		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_RELEASE && last_frame_down == 3)
+		{
+			last_frame_down = 0;
+			star_maps.spawn_entity(-1, 1, 0, glm::vec3(100, 100, 60));
+		}
+
 		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);
 		game_ui->render(camera_position, camera_front);
@@ -135,6 +143,8 @@ int main()
 			switch_display_type(star_maps_window, true);
 		if (ImGui::Button("Windowed"))
 			switch_display_type(star_maps_window, false);
+		if (ImGui::Button("Close"))
+			glfwSetWindowShouldClose(star_maps_window, 1);
 		ImGui::End();
 		ImGui::Render();
 		if (show_debug)

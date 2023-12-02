@@ -1,4 +1,4 @@
-// orbit rings vert shader 
+// orbit rings frag shader 
 #version 330 core
 
 in vec2 texCoord;
@@ -9,5 +9,5 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(ourTexture, texCoord);
+    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }

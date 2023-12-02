@@ -1,7 +1,7 @@
 #include <objects.h>
 
 // Class initialization function for game objects.
-game_object::game_object()
+game_object::game_object(GLFWwindow *window)
 {
     this->VAO = 0;
     this->EBO = 0;
@@ -13,6 +13,7 @@ game_object::game_object()
     this->rotation_speed = 0.5;
     this->position = glm::vec3(0.0, 0.0, 0.0);
     this->render_bb = false;
+    this->window = window;
 }
 
 // Function to load obj files for game objects using Assimp.
@@ -171,7 +172,7 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
 
     // Every object will orbit around its parent object. (Besides the sun, hence why I start at entity 2) Here is where the 
     // new position of each object on its orbit path is calculated:
-    if (this->planet_entity_id > 1)
+    if (this->planet_entity_id > 1 && this->parent != 0)
     {
         // Find the center of the objects parent:
         glm::vec3 parent_planet_center = this->parent_planet->get_center();
@@ -191,6 +192,31 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
     // Add rotation/spinning for all planets (any object higher than entity id 7 will be spawned after the planets):
     if (this->planet_entity_id < 8)
         model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
+
+    if (this->parent == 0)
+    {
+        // Get mouse position
+        double mouseX, mouseY;
+        glfwGetCursorPos(this->window, &mouseX, &mouseY); // Assuming 'window' is your GLFW window
+
+        // Convert mouse position to world coordinates
+        int screenWidth, screenHeight;
+        glfwGetWindowSize(window, &screenWidth, &screenHeight);
+        float normalizedX = (2.0f * mouseX) / screenWidth - 1.0f;
+        float normalizedY = 1.0f - (2.0f * mouseY) / screenHeight;
+
+        glm::vec4 ray_clip = glm::vec4(normalizedX, normalizedY, -1.0, 1.0);
+        glm::vec4 ray_eye = glm::inverse(projection_matrix) * ray_clip;
+        ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+        glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;
+        glm::vec3 ray_direction = glm::normalize(glm::vec3(ray_world));
+
+        // Update object's position based on mouse world coordinates
+        this->position = camera_position + ray_direction * 200.05f; // Adjust 'some_distance_factor' as needed
+
+        // Update the model matrix with the new position
+        model_matrix = glm::translate(glm::mat4(1.0f), this->position);
+    }
 
     // Find the view matrix and projection with the passed in camera position and camera front references:
     float fov = 45.0f;
@@ -216,6 +242,8 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
     // Render the objects bounding box if needed:
     if (this->render_bb)
         this->render_bounding_box();
+
+    glUseProgram(0);
 }
 
 // Function to render the bounding box for a game object.
@@ -268,6 +296,7 @@ void game_object::render_bounding_box() {
     glBindVertexArray(0);
     glDeleteVertexArrays(1, &bb_VAO);
     glDeleteBuffers(1, &bb_VBO);
+    glUseProgram(0);
 }
 
 // Class initialization function for orbit path rings.
@@ -303,13 +332,19 @@ rings::rings() {
 }
 
 // Function to render the orbit path rings.
-void rings::render()
+void rings::render(const glm::vec3& camera_position, const glm::vec3& camera_front)
 {
+    glUseProgram(this->shader);
     glBindVertexArray(this->VAO);
     glLineWidth(1.0f);
 
     // Radiuses for the orbit path ring positions:
     float radiuses[7] = { 200.0 , 322.5, 450.0, 570.0, 742.5, 925.0 };
+
+    // Find the view matrix and projection with the passed in camera position and camera front references:
+    float fov = 45.0f;
+    glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 projection_matrix = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
     // Apply the correct translations for each of the seven rings and draw it:
     for (int i = 0; i < 6; i++)
@@ -318,9 +353,13 @@ void rings::render()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(radiuses[i], radiuses[i], radiuses[i]));
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
         glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_LINE_LOOP, 0, 360);
     }
+    glUseProgram(0);
+
 }
 
 // Function to read in the text of a shader file.
@@ -360,11 +399,26 @@ GLuint load_shader(const char* vertex_file_path, const char* frag_file_path)
     glCompileShader(vertex_shader);
     free(vertex_shader_content);
 
+    GLint success;
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[512];
+        glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
+        std::cout << "Vertex shader " << vertex_file_path << " compilation failed : " << infoLog << std::endl;
+    }
+
     // Repeat for frag shader:
     GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &frag_shader_content, NULL);
     glCompileShader(fragment_shader);
     free(frag_shader_content);
+
+    glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        GLchar infoLog[512];
+        glGetShaderInfoLog(fragment_shader, 512, NULL, infoLog);
+        std::cerr << "Fragment shader" << frag_file_path << "compilation failed: " << infoLog << std::endl;
+    }
 
     // Create shader program with the now compiled vertex and fragment shaders:
     GLuint shader_program = glCreateProgram();

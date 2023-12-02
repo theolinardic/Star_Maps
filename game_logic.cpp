@@ -6,7 +6,7 @@
 // 1 Hour IRL = 2.5 Days In-Game
 
 // Class initialization function for star_maps_game, the main logic of the entire game.
-star_maps_game::star_maps_game(bool p)
+star_maps_game::star_maps_game(bool p, GLFWwindow* window)
 {
 	this->paused = p;
 	this->game_speed_multiplier = 1.0;
@@ -14,6 +14,7 @@ star_maps_game::star_maps_game(bool p)
 	this->in_game_hour = 0;
 	this->in_game_minute = 0;
 	this->in_game_second = 0.0;
+	this->window = window;
 
 	// Load all these from the file after the user picks a save:
 	this->player_money = 0.00;
@@ -389,7 +390,7 @@ void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm:
 	for (game_object* obj : this->entitiys)
 		obj->render(camera_position, camera_front, game_speed);
 	if (this->entitiys.size() != 0)
-		this->orbit_rings->render();
+		this->orbit_rings->render(camera_position, camera_front);
 }
 
 // Function to spawn a new game object with the passed in values.
@@ -399,10 +400,18 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	long int new_entity_id = ++this->num_entitys;
 	
 	std::cout << "Spawning new entity of type " << type << ". - ID: " << new_entity_id << std::endl;
-	game_object* new_ent = new game_object();
+	game_object* new_ent = new game_object(this->window);
 
 	// Depending on the object type passed in, different shaders and obj files will be loaded:
 	switch (type) {
+	case -1: // Temporary Item When picking a placement spot
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/planets/planet.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 0;
+		new_ent->orbit_speed = 0;
+		new_ent->size_adjust = 10;
+		break;
 	case 0: // Sun
 		new_ent->shader = load_shader("shaders/planets/vert.glsl", "shaders/planets/frag.glsl");
 		new_ent->load_object("assets/objects/planets/planet.obj");
@@ -555,7 +564,6 @@ void star_maps_game::close_game()
 {
 	exit(0);
 }
-
 
 // Function to convert text value of difficulty to an integer.
 int diff_text_to_int(std::string diff)

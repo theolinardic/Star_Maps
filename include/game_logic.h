@@ -39,8 +39,9 @@ public:
 	float total_played_second;
 	int difficulty; // 1 = Easy, 2 = Medium, 3 = Hard.
 	float status_1_percent, status_2_percent, status_3_percent;
+	GLFWwindow* window;
 
-	star_maps_game(bool p);
+	star_maps_game(bool p, GLFWwindow* window);
 	void reset_settings();
 	json get_settings();
 	void change_setting(const std::string setting, const json new_value);

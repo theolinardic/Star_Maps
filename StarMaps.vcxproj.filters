@@ -43,6 +43,9 @@
     <Filter Include="Source Files\Shader Files\ui_elements">
       <UniqueIdentifier>{7f9340d3-bec0-4c44-9ca5-157a450b1a8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shader Files\Placing Item">
+      <UniqueIdentifier>{b9b098b5-0ca6-4651-9e3f-a2cab9628695}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -186,6 +189,12 @@
     </None>
     <None Include="shaders\ui_elements\vert.glsl">
       <Filter>Source Files\Shader Files\ui_elements</Filter>
+    </None>
+    <None Include="shaders\placing_item\frag.glsl">
+      <Filter>Source Files\Shader Files\Placing Item</Filter>
+    </None>
+    <None Include="shaders\placing_item\vert.glsl">
+      <Filter>Source Files\Shader Files\Placing Item</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
