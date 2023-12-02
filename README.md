@@ -1,6 +1,6 @@
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/logos/Logo_Idea3.png "Star Maps")
 # A game about building the perfect system.
-### Version: 0.40
+### Version: 0.50
 Created by Theodore Linardic for COP XXXX - Computer Graphics at the University of Central Florida.
 
 Star Maps brings a whole new spin on the City-Builder genre by letting *you* build the next great civilization in space!
@@ -40,3 +40,6 @@ Libraries:
 3D Objects Created Using:
 - [Blender](https://www.blender.org/)
 - [Asset Forge](https://kenney.itch.io/assetforge)
+
+Original Images/Textures and Modifications Created Using:
+- [Paint.Net](https://www.getpaint.net/)
