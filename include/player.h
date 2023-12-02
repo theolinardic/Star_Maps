@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <objects.h>
+#include <hud_control.h>
 
 #define PLANET_NAME_JSON "assets/planet_names.json"
 
@@ -17,4 +18,4 @@ extern float movement_speed;
 extern float sensitivity;
 extern bool show_debug;
 
-void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys);
+void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys);

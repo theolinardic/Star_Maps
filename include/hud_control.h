@@ -14,7 +14,7 @@
 class element
 {
 public:
-	int ui_id;
+	int ui_id, img_width, img_height, status;
 	GLuint texture_id, VAO, VBO, EBO, shader;
 	float aspect_ratio;
 	bool should_render;

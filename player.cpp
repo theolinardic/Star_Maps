@@ -5,7 +5,7 @@ float movement_speed = 1.0f;
 bool show_debug = true;
 
 // Function to read player input and act based on it:
-void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys)
+void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys)
 {
 	if (glfwGetKey(star_maps_window, GLFW_KEY_W) == GLFW_PRESS) // Move forward
 		camera_position += movement_speed * camera_front;
@@ -25,6 +25,51 @@ void read_player_input(GLFWwindow* star_maps_window, glm::vec3& camera_position,
 		camera_pitch += sensitivity;
 	if (glfwGetKey(star_maps_window, GLFW_KEY_DOWN) == GLFW_PRESS) // Tilt Camera Down
 		camera_pitch -= sensitivity;
+
+	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
+		double mx, my;
+		glfwGetCursorPos(star_maps_window, &mx, &my);
+
+		if (mx > 840 && mx < 975 && my > 957 && my < 1067) // select tool
+			game_ui->update_element(1, 1);
+		else if (mx > 1000 && mx < 1129 && my > 957 && my < 1067) // delete tool
+			game_ui->update_element(1, 2);
+		else if (mx > 1167 && mx < 1292 && my > 957 && my < 1067) // save tool
+			game_ui->update_element(1, 0);
+		else if (mx > 1320 && mx < 1445 && my > 957 && my < 1067) // exit tool
+			game_ui->update_element(1, 0);
+		else if (mx > 100 && mx < 155 && my > 950 && my < 1005) // tile 1
+			game_ui->update_element(0, 0);
+		else if (mx > 197 && mx < 251 && my > 950 && my < 1005) // tile 2
+			game_ui->update_element(0, 0);
+		else if (mx > 293 && mx < 357 && my > 950 && my < 1005) // tile 3
+			game_ui->update_element(0, 0);
+		else if (mx > 389 && mx < 444 && my > 950 && my < 1005) // tile 4
+			game_ui->update_element(0, 0);
+		else if (mx > 484 && mx < 540 && my > 950 && my < 1005) // tile 5
+			game_ui->update_element(0, 0);
+		else if (mx > 580 && mx < 636 && my > 950 && my < 1005) // tile 6
+			game_ui->update_element(0, 0);
+		else if (mx > 100 && mx < 155 && my > 1015 && my < 1070) // tile 7
+			game_ui->update_element(0, 0);
+		else if (mx > 197 && mx < 251 && my > 1015 && my < 1070) // tile 8
+			game_ui->update_element(0, 0);
+		else if (mx > 293 && mx < 357 && my > 1015 && my < 1070) // tile 9
+			game_ui->update_element(0, 0);
+		else if (mx > 389 && mx < 444 && my > 1015 && my < 1070) // tile 10
+			game_ui->update_element(0, 0);
+		else if (mx > 484 && mx < 540 && my > 1015 && my < 1070) // tile 11
+			game_ui->update_element(0, 0);
+		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070) // tile 12
+			game_ui->update_element(0, 0);
+		else if (mx > 1145 && mx < 1166 && my >= 0 && my < 25) // pause
+			game_ui->update_element(3, 1);
+		else if (mx > 1186 && mx < 1208 && my >= 0 && my < 25) // play
+			game_ui->update_element(3, 2);
+		else if (mx > 1220 && mx < 1245 && my >= 0 && my < 25) // ffwd
+			game_ui->update_element(3, 3);
+	}
 
 	// Clamp the camera pitch to keep it oriented correctly:
 	if (camera_pitch > 89.0f)

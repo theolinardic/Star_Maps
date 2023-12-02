@@ -90,7 +90,6 @@ int main()
 		star_maps.update_debug_ingame_clock(glfwGetTime() - last_frame_time);
 		last_frame_time = glfwGetTime();
 
-
 		glm::vec3 front;
 		front.x = cos(glm::radians(camera_yaw)) * cos(glm::radians(camera_pitch));
 		front.y = sin(glm::radians(camera_pitch));
@@ -99,18 +98,22 @@ int main()
 
 		// Don't read GLFW window input if mouse is interacting with debug tools, otherwise handle all player inputs in player.cpp:
 		if (!io.WantCaptureMouse)
-			read_player_input(star_maps_window, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
+			read_player_input(star_maps_window, game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
 
 		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);
 		game_ui->render(camera_position, camera_front);
 		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
 
+		double mx, my;
+		glfwGetCursorPos(star_maps_window, &mx, &my);
+
 		// Create elements for the debug tools and render them to the screen:
 		float time_open_sec = glfwGetTime() - launch_time;
 		int time_open_min = time_open_sec / 60;
 		ImGui::Begin("Debug Window");
 		ImGui::Text("Window: %dx%d %.2f FPS", screenWidth, screenHeight, static_cast<float>(fps));
+		ImGui::Text("Mouse: %f %f", mx, my);
 		if (time_open_min >= 1)
 			ImGui::Text("Time open: %dm %.1fs", time_open_min, (time_open_sec - (60 * time_open_min)));
 		else

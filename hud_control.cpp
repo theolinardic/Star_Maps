@@ -5,6 +5,7 @@ element::element(int id)
 {
     this->ui_id = id;
     this->should_render = true;
+    this->status = 0;
 
     // Set up shader for the hud:
     this->shader = load_shader("shaders/ui_elements/vert.glsl", "shaders/ui_elements/frag.glsl");
@@ -22,59 +23,62 @@ element::element(int id)
     switch (this->ui_id)
     {
     case 0: // Tile Selector
-        img_file = "assets/textures/ui/main_game/tiles_empty.png";
+        img_file = "assets/textures/ui/tile_selector/tiles_empty.png";
         break;
     case 1: // Tool Selector
-        img_file = "assets/textures/ui/main_game/tools_none_selected.png";
+        img_file = "assets/textures/ui/tools_selector/tools_none_selected.png";
         break;
     case 2: // Progress Bar
-        img_file = "assets/textures/ui/main_game/progress_bars_empty.png";
+        img_file = "assets/textures/ui/progress_bar/progress_bars_empty.png";
             break;
     case 3: // Time Bar
-        img_file = "assets/textures/ui/main_game/time_bar_empty.png";
+        img_file = "assets/textures/ui/time_bar/time_bar_empty.png";
             break;
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
     }
 
-    int width, height;
-    unsigned char* image = SOIL_load_image(img_file.c_str(), &width, &height, 0, SOIL_LOAD_RGBA); // Note: c._str() casts std::string to cons* char
+    unsigned char* image = SOIL_load_image(img_file.c_str(), &this->img_width, &this->img_height, 0, SOIL_LOAD_RGBA); // Note: c._str() casts std::string to cons* char
     if (image) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_width, img_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture: " << img_file << std::endl;
     SOIL_free_image_data(image);
 
-    GLfloat aspect_ratio = width / height;
-    GLfloat size = 0.18f;
+    this->aspect_ratio = static_cast<float>(this->img_width) / static_cast<float>(this->img_height);
+    printf("%f ", this->aspect_ratio);
+    GLfloat size = 0.155f;
     float adjustmentX, adjustmentY;
     
     switch (this->ui_id)
     {
     case 0: // Tile Selector
-        adjustmentX = 1.0f;
-        adjustmentY = 0.8f;
+        adjustmentX = 1.08f;
+        adjustmentY = 0.85f;
         break;
     case 1: // Tool Selector
-        adjustmentX = -0.6f;
-        adjustmentY = 0.8f;
+        adjustmentX = -0.35f;
+        adjustmentY = 0.85f;
         break;
     case 2: // Progress Bar
-        adjustmentX = 1.0f;
-        adjustmentY = 0.8f;
+        adjustmentX = -1.4f;
+        adjustmentY = 0.80f;
+        size = 0.2f;
         break;
     case 3: // Time Bar
-        adjustmentX = 1.0f;
-        adjustmentY = 0.8f;
-        break;    }
+        adjustmentX = 0.0f;
+        adjustmentY = -0.965f;
+        size = 0.04f;
+        break;
+    }
     
     GLfloat vertices[] = {
-        -aspect_ratio * size - adjustmentX, -size - adjustmentY, 0.0f, 0.0f, 1.0f, // bottom left
-        -aspect_ratio * size - adjustmentX, size - adjustmentY, 0.0f, 0.0f, 0.0f, // top left
-        aspect_ratio * size - adjustmentX, size - adjustmentY, 0.0f, 1.0f, 0.0f, // bottom right
-        aspect_ratio * size - adjustmentX, -size - adjustmentY, 0.0f, 1.0f, 1.0f // top right
+        -this->aspect_ratio * size - adjustmentX, -size - adjustmentY, 0.0f, 0.0f, 1.0f, // bottom left
+        -this->aspect_ratio * size - adjustmentX, size - adjustmentY, 0.0f, 0.0f, 0.0f, // top left
+        this->aspect_ratio * size - adjustmentX, size - adjustmentY, 0.0f, 1.0f, 0.0f, // bottom right
+        this->aspect_ratio * size - adjustmentX, -size - adjustmentY, 0.0f, 1.0f, 1.0f // top right
     };
 
     GLuint indices[] = {
@@ -105,6 +109,11 @@ element::element(int id)
 // Function to change the image of a ui element.
 void element::switch_img(int new_status)
 {
+    // If image is the same as the current, no need to go through the process to swap the texture:
+    if (this->status == new_status)
+        return;
+    this->status = new_status;
+
     std::string new_img_file;
 
     switch (this->ui_id)
@@ -113,7 +122,7 @@ void element::switch_img(int new_status)
         switch (new_status)
         {
         case 0: // Default/None Selected
-            new_img_file = "assets/textures/ui/main_game/tiles_empty.png";
+            new_img_file = "assets/textures/ui/tile_selector/tiles_empty.png";
             break;
         case 1:
             break;
@@ -125,9 +134,13 @@ void element::switch_img(int new_status)
         switch (new_status)
         {
         case 0: // Default/None Selected
-            new_img_file = "assets/textures/ui/main_game/tools_none_selected.png";
+            new_img_file = "assets/textures/ui/tools_selector/tools_none_selected.png";
             break;
-        case 1:
+        case 1: // Pick/Move Selected
+            new_img_file = "assets/textures/ui/tools_selector/tools_pick_selected.png";
+            break;
+        case 2: // Delete Selected
+            new_img_file = "assets/textures/ui/tools_selector/tools_delete_selected.png";
             break;
         default:
             std::cout << "Error status type: " << new_status << " on ui id: " << this->ui_id << "is not valid." << std::endl;
@@ -137,7 +150,7 @@ void element::switch_img(int new_status)
         switch (new_status)
         {
         case 0: // Default/Empty
-            new_img_file = "assets/textures/ui/main_game/progress_bars_empty.png";
+            new_img_file = "assets/textures/ui/progress_bar/progress_bars_empty.png";
             break;
         case 1:
             break;
@@ -149,9 +162,16 @@ void element::switch_img(int new_status)
         switch (new_status)
         {
         case 0: // Default
-            new_img_file = "assets/textures/ui/main_game/time_bar_empty.png";
+            new_img_file = "assets/textures/ui/time_bar/time_bar_empty.png";
             break;
-        case 1:
+        case 1: // Paused
+            new_img_file = "assets/textures/ui/time_bar/time_bar_pause.png";
+            break;
+        case 2: // Play
+            new_img_file = "assets/textures/ui/time_bar/time_bar_play.png";
+            break;
+        case 3: // Fast Forward
+            new_img_file = "assets/textures/ui/time_bar/time_bar_ffwd.png";
             break;
         default:
             std::cout << "Error status type: " << new_status << " on ui id: " << this->ui_id << "is not valid." << std::endl;
@@ -160,21 +180,39 @@ void element::switch_img(int new_status)
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
     }
+
+    unsigned char* image = SOIL_load_image(new_img_file.c_str(), &this->img_width, &this->img_height, 0, SOIL_LOAD_RGBA);
+    if (image) {
+        glBindTexture(GL_TEXTURE_2D, this->texture_id);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_width, img_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        // Update aspect ratio if necessary
+        this->aspect_ratio = static_cast<float>(this->img_width) / static_cast<float>(this->img_height);
+
+        SOIL_free_image_data(image);
+    }
+    else
+        std::cout << "Failed to load texture on swap: " << new_img_file << std::endl;
 }
 
 // Function to render invidual ui element.
 void element::render(glm::vec3 camera_position, glm::vec3 camera_front)
 {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
+
     glUseProgram(this->shader);
     glBindVertexArray(this->VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->texture_id);
-    float aspectRatio = 1920.0f / 1080.0f;
-    glm::mat4 projection_matrix = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+
+    float w = monitor_settings->width;
+    float h = monitor_settings->height;
+    glm::mat4 projection_matrix = glm::ortho(-(w/h), w/h, -1.0f, 1.0f, -1.0f, 1.0f);
 
     glUniform1i(glGetUniformLocation(this->shader, "text"), 0);
     glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
-
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
@@ -186,8 +224,8 @@ HUD::HUD()
     this->should_render = true;
     this->add_element(0);
     this->add_element(1);
-    //this->add_element(2);
-   // this->add_element(3);
+    this->add_element(2);
+    this->add_element(3);
 }
 
 // Function to add new UI element.
