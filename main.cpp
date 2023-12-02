@@ -51,6 +51,8 @@ int main()
 	int screenWidth, screenHeight;
 	double fps;
 	bool fullscreen = true;
+	// 0 = none, 1 = left, 2 = right
+	int last_frame_down = 0;
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
@@ -98,7 +100,7 @@ int main()
 
 		// Don't read GLFW window input if mouse is interacting with debug tools, otherwise handle all player inputs in player.cpp:
 		if (!io.WantCaptureMouse)
-			read_player_input(star_maps_window, game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys);
+			read_player_input(star_maps_window, game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys, last_frame_down);
 
 		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);

@@ -5,7 +5,7 @@ float movement_speed = 1.0f;
 bool show_debug = true;
 
 // Function to read player input and act based on it:
-void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys)
+void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, std::vector<game_object*> entitiys, int& last_frame_down)
 {
 	if (glfwGetKey(star_maps_window, GLFW_KEY_W) == GLFW_PRESS) // Move forward
 		camera_position += movement_speed * camera_front;
@@ -27,7 +27,11 @@ void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& ca
 		camera_pitch -= sensitivity;
 
 	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		last_frame_down = 1;
+
+	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && last_frame_down == 1)
 	{
+		last_frame_down = 0;
 		double mx, my;
 		glfwGetCursorPos(star_maps_window, &mx, &my);
 
@@ -77,9 +81,12 @@ void read_player_input(GLFWwindow* star_maps_window, HUD* game_ui, glm::vec3& ca
 	if (camera_pitch < -89.0f)
 		camera_pitch = -89.0f;
 
+	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+		last_frame_down = 2;
 	// Raycast to check which object the player is trying to interact with:
-	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) // Right Click
+	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE && last_frame_down == 2) // Right Click
 	{
+		last_frame_down = 0;
 		// Get resolution of the glfw window:
 		int window_width, window_height;
 		glfwGetWindowSize(star_maps_window, &window_width, &window_height);
