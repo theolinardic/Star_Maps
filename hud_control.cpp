@@ -142,6 +142,18 @@ void element::switch_img(int new_status)
         case 2: // Delete Selected
             new_img_file = "assets/textures/ui/tools_selector/tools_delete_selected.png";
             break;
+        case 3: // Hovering over save
+            new_img_file = "assets/textures/ui/tools_selector/tools_save_preview.png";
+            break;
+        case 4: // Hovering over quit
+            new_img_file = "assets/textures/ui/tools_selector/tools_quit_preview.png";
+            break;
+        case 5: // Hovering over pick
+            new_img_file = "assets/textures/ui/tools_selector/tools_pick_preview.png";
+            break;
+        case 6: // Hovering over delete
+            new_img_file = "assets/textures/ui/tools_selector/tools_delete_preview.png";
+            break;
         default:
             std::cout << "Error status type: " << new_status << " on ui id: " << this->ui_id << "is not valid." << std::endl;
         }

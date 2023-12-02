@@ -27,8 +27,22 @@ void read_player_input(GLFWwindow* star_maps_window, bool& paused, float& game_s
 		camera_pitch -= sensitivity;
 
 	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	{
 		last_frame_down = 1;
+		double mx, my;
+		glfwGetCursorPos(star_maps_window, &mx, &my);
 
+		// If about to click on save or exit, give slight visual confirmation by changing texture:
+		if (mx > 840 && mx < 975 && my > 957 && my < 1067) // select tool
+			game_ui->update_element(1, 5);
+		else if (mx > 1000 && mx < 1129 && my > 957 && my < 1067) // delete tool
+			game_ui->update_element(1, 6);
+		else if (mx > 1167 && mx < 1292 && my > 957 && my < 1067) // save tool
+			game_ui->update_element(1, 3);
+		else if (mx > 1320 && mx < 1445 && my > 957 && my < 1067) // exit tool
+			game_ui->update_element(1, 4);
+	}
+		
 	if (glfwGetMouseButton(star_maps_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && last_frame_down == 1)
 	{
 		last_frame_down = 0;
@@ -87,7 +101,10 @@ void read_player_input(GLFWwindow* star_maps_window, bool& paused, float& game_s
 			}
 			game_speed *= 2.0f;
 			game_ui->update_element(3, 3);
-		}	
+		}
+		// Reset tool bar to place in case player started to click on save/quit but then moved the mouse:
+		else 
+			game_ui->update_element(1, 1);
 	}
 
 	// Clamp the camera pitch to keep it oriented correctly:
