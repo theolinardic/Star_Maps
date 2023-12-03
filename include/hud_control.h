@@ -26,9 +26,10 @@ public:
 	int ui_id, img_width, img_height, status;
 	GLuint texture_id, VAO, VBO, EBO, shader;
 	float aspect_ratio;
-	bool should_render;
+	bool should_render, deleted;
 
 	element(int id);
+	~element();
 	void switch_img(int new_status);
 	void render(glm::vec3 camera_position, glm::vec3 camera_front, GLFWwindow* window);
 };

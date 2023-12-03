@@ -156,7 +156,6 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="hud_control.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="player.cpp" />
     <ClCompile Include="objects.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +173,6 @@
     <ClInclude Include="include\generate_map.h" />
     <ClInclude Include="include\hud_control.h" />
     <ClInclude Include="include\json.hpp" />
-    <ClInclude Include="include\player.h" />
     <ClInclude Include="include\player.h\Header.h" />
     <ClInclude Include="include\objects.h" />
   </ItemGroup>

@@ -13,7 +13,6 @@
 // Below are original source files for Star Maps:
 #include <objects.h>
 #include <generate_map.h>
-#include <player.h>
 #include <game_logic.h>
 #include <hud_control.h>
 
@@ -43,16 +42,14 @@ int main()
 	float launch_time = glfwGetTime();
 	float last_frame_time = glfwGetTime();
 	float awake_time = 0;
+	HUD* game_ui = new HUD(star_maps_window);
 
 	// Start the brain of the game:
-	star_maps_game star_maps = star_maps_game(false, star_maps_window);
+	star_maps_game star_maps = star_maps_game(false, star_maps_window, game_ui);
 
-	HUD* game_ui = new HUD(star_maps_window);
 	int screenWidth, screenHeight;
 	double fps;
 	bool fullscreen = true;
-	// 0 = none, 1 = left, 2 = right
-	int last_frame_down = 0;
 
 	// Main game/render loop:
 	while (!glfwWindowShouldClose(star_maps_window))
@@ -100,13 +97,13 @@ int main()
 
 		// Don't read GLFW window input if mouse is interacting with debug tools, otherwise handle all player inputs in player.cpp:
 		if (!io.WantCaptureMouse)
-			read_player_input(star_maps_window, star_maps.paused, star_maps.game_speed_multiplier,  game_ui, camera_position, camera_front, camera_yaw, camera_pitch, star_maps.entitiys, last_frame_down);
+			star_maps.read_player_input(camera_position, camera_front, camera_yaw, camera_pitch);
 
 		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_PRESS)
-			last_frame_down = 3;
-		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_RELEASE && last_frame_down == 3)
+			star_maps.last_frame_down = 3;
+		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_RELEASE && star_maps.last_frame_down == 3)
 		{
-			last_frame_down = 0;
+			star_maps.last_frame_down = 0;
 			star_maps.spawn_entity(-1, 1, 0, glm::vec3(100, 100, 60));
 		}
 

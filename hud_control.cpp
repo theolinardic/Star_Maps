@@ -6,6 +6,7 @@ element::element(int id)
     this->ui_id = id;
     this->should_render = true;
     this->status = 0;
+    this->deleted = false;
 
     // Set up shader for the hud:
     this->shader = load_shader("shaders/ui_elements/vert.glsl", "shaders/ui_elements/frag.glsl");
@@ -46,11 +47,11 @@ element::element(int id)
     case 8: // Mass Housing Tile Preview
         img_file = "assets/textures/ui/tile_previews/mhs_preview.png";
         break;
-    case 9: // Ship Factory Tile Preview
-        img_file = "assets/textures/ui/tile_previews/sf_preview.png";
-        break;
-    case 10: // Power Station Tile Preview
+    case 9: // Power Station Tile Preview
         img_file = "assets/textures/ui/tile_previews/ps_preview.png";
+        break;
+    case 10: // Ship Factory Tile Preview
+        img_file = "assets/textures/ui/tile_previews/sf_preview.png";
         break;
     case 11: // Ship Store Tile Preview
         img_file = "assets/textures/ui/tile_previews/ss_preview.png";
@@ -64,11 +65,11 @@ element::element(int id)
     case 14: // Bank Station Tile Preview
         img_file = "assets/textures/ui/tile_previews/bs_preview.png";
         break;
-    case 15: // Amusement Park Tile Preview
-        img_file = "assets/textures/ui/tile_previews/ap_preview.png";
-        break;
-    case 16: // Holo Drive In Preview
+    case 15: // Holo Drive In Preview
         img_file = "assets/textures/ui/tile_previews/hdi_preview.png";
+        break;
+    case 16: // Amusement Park Tile Preview
+        img_file = "assets/textures/ui/tile_previews/ap_preview.png";
         break;
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
@@ -107,10 +108,10 @@ element::element(int id)
         adjustmentY = -0.965f;
         size = 0.04f;
         break;
-    default:
-        adjustmentX = 0.0f;
-        adjustmentY = 0.0f;
-        size = 1.0f;
+    default: // Preview tiles
+        adjustmentX = 1.09f;
+        adjustmentY = 0.44f;
+        size = 0.25f;
     }
     
     GLfloat vertices[] = {
@@ -145,6 +146,13 @@ element::element(int id)
     glBindVertexArray(0);
 }
 
+element::~element() {
+    glDeleteTextures(1, &this->texture_id);
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteBuffers(1, &this->EBO);
+    glDeleteVertexArrays(1, &this->VAO);
+}
+
 // Function to change the image of a ui element.
 void element::switch_img(int new_status)
 {
@@ -163,7 +171,41 @@ void element::switch_img(int new_status)
         case 0: // Default/None Selected
             new_img_file = "assets/textures/ui/tile_selector/tiles_none_selected.png";
             break;
-        case 1:
+        case 5: // System Launcher Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_sl_selected.png";
+            break;
+        case 6: // Galaxy Launcher Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_gl_selected.png";
+            break;
+        case 7: // Housing Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_hs_selected.png";
+            break;
+        case 8: // Mass Housing Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_mhs_selected.png";
+            break;
+        case 9: // Power Station Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_ps_selected.png";
+            break;
+        case 10: // Ship Factory Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_sf_selected.png";
+            break;
+        case 11: // Ship Store Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_ss_selected.png";
+            break;
+        case 12: // Food Station Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_fs_selected.png";
+            break;
+        case 13: // Weapons Store Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_ws_selected.png";
+            break;
+        case 14: // Bank Station Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_bs_selected.png";
+            break;
+        case 15: // Holo Drive In Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_hdi_selected.png";
+            break;
+        case 16: // Amusement Park Tile Preview
+            new_img_file = "assets/textures/ui/tile_selector/tiles_ap_selected.png";
             break;
         default:
             std::cout << "Error status type: " << new_status << " on ui id: " << this->ui_id << "is not valid." << std::endl;
@@ -250,38 +292,8 @@ void element::switch_img(int new_status)
 // Function to render invidual ui element.
 void element::render(glm::vec3 camera_position, glm::vec3 camera_front, GLFWwindow* window)
 {
-    GLint depth_func;
-    glGetIntegerv(GL_DEPTH_FUNC, &depth_func);
-
-    // Temporarily disable depth testing so text renders on top
-    glDisable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
-
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
-
-    if (this->ui_id > 4 && this->ui_id < 17)
-    {
-        double mouse_x, mouse_y;
-        glfwGetCursorPos(window, &mouse_x, &mouse_y);
-        float normalized_mouse_x = static_cast<float>(2.0 * mouse_x / monitor_settings->width - 1.0);
-        float normalized_mouse_y = static_cast<float>(-2.0 * mouse_y / monitor_settings->height + 1.0);
-        float adjusted_x = normalized_mouse_x;
-        float adjusted_y = normalized_mouse_y + 0.1f;
-
-        GLfloat size = 0.155f;
-
-        GLfloat vertices[] = {
-            -this->aspect_ratio * size + adjusted_x, -size + adjusted_y, 0.0f, 0.0f, 1.0f, // bottom left
-            -this->aspect_ratio * size + adjusted_x, size + adjusted_y, 0.0f, 0.0f, 0.0f, // top left
-            this->aspect_ratio * size + adjusted_x, size + adjusted_y, 0.0f, 1.0f, 0.0f, // bottom right
-            this->aspect_ratio * size + adjusted_x, -size + adjusted_y, 0.0f, 1.0f, 1.0f // top right
-        };
-
-        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    }
 
     glUseProgram(this->shader);
     glBindVertexArray(this->VAO);
@@ -295,11 +307,7 @@ void element::render(glm::vec3 camera_position, glm::vec3 camera_front, GLFWwind
     glUniform1i(glGetUniformLocation(this->shader, "text"), 0);
     glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
     glBindVertexArray(0);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(depth_func);
 }
 
 text_element::text_element(int id, std::string text)
@@ -498,7 +506,12 @@ void HUD::delete_preview()
     {
         for (element* elm : this->all_elements)
             if (elm->ui_id == current_preview)
+            {
+                elm->deleted = true;
                 elm->should_render = false;
+                //delete elm;
+            }
+                
         current_preview = -1;
     }
 }

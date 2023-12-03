@@ -19,11 +19,14 @@
 #include <sstream>
 #include <json.hpp>
 #include <objects.h>
-#include <player.h>
 #include <hud_control.h>
 
 #define SETTINGS_FILE_LOCATION "settings.json"
 
+extern float movement_speed;
+extern float sensitivity;
+extern bool show_debug;
+#define PLANET_NAME_JSON "assets/planet_names.json"
 using json = nlohmann::json;
 
 class star_maps_game
@@ -42,8 +45,13 @@ public:
 	int difficulty; // 1 = Easy, 2 = Medium, 3 = Hard.
 	float status_1_percent, status_2_percent, status_3_percent;
 	GLFWwindow* window;
+	HUD* game_ui;
+	// 0 = none, 1 = left, 2 = right
+	int last_frame_down;
 
-	star_maps_game(bool p, GLFWwindow* window);
+	int current_tool;
+
+	star_maps_game(bool p, GLFWwindow* window, HUD* ui);
 	void reset_settings();
 	json get_settings();
 	void change_setting(const std::string setting, const json new_value);
@@ -63,6 +71,8 @@ public:
 	void switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch);
 	void save_and_return_to_menu();
 	void close_game();
+	void read_player_input(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch);
+
 };
 
 int diff_text_to_int(std::string diff);
