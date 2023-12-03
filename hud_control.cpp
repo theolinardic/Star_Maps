@@ -263,6 +263,16 @@ void element::render(glm::vec3 camera_position, glm::vec3 camera_front)
     glBindVertexArray(0);
 }
 
+text_element::text_element(int locatiom, std::string test)
+{
+
+}
+
+void text_element::render(glm::vec3 camera_position, glm::vec3 camera_front)
+{
+
+}
+
 // Class intialization function for a HUD object.
 HUD::HUD()
 {

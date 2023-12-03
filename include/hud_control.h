@@ -24,6 +24,15 @@ public:
 	void render(glm::vec3 camera_position, glm::vec3 camera_front);
 };
 
+class text_element
+{
+public:
+	std::string text;
+
+	text_element(int location, std::string text);
+	void render(glm::vec3 camera_position, glm::vec3 camera_front);
+};
+
 class HUD
 {
 public:
