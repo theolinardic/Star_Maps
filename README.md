@@ -26,12 +26,9 @@ Libraries:
 - [JSON for Modern C++](https://github.com/nlohmann/json)
 - [SOIL2](https://github.com/SpartanJ/SOIL2)
 - [Assimp](https://github.com/assimp/assimp)
+- [FreeType](https://freetype.org/)
 
-3D Objects Created Using:
-- [Blender](https://www.blender.org/)
-- [Asset Forge](https://kenney.itch.io/assetforge)
-
-Images/Textures/Models:
+Assets:
 - [Wenrexa's SciFi Minimalism UI Pack](https://wenrexa.itch.io/kit-nesia2)
 - [Prinble's Hi-Tech Buttons Pack I](https://prinbles.itch.io/hi-tech-buttons-pack-i)
 - [Solar System Scope's Textures](https://www.solarsystemscope.com/textures/)
@@ -42,9 +39,12 @@ Images/Textures/Models:
 - [Kenneys City Kit (add-on for Asset Forge)](https://kenney.nl/assets/city-kit-commercial)
 - [Kenneys Space Kit (add-on for Asset Forge)](https://kenney.nl/assets/space-kit)
 - [Kenneys Conveyor Kit (add-on for Asset Forge)](https://kenney.nl/assets/conveyor-kit)
-
-Sounds:
 - [Ellr's Universal UI/Menu Soundpack](https://ellr.itch.io/universal-ui-soundpack)
+- [High Speed Font](https://www.dafont.com/high-speed-3.font)
+
+3D Objects Created Using:
+- [Blender](https://www.blender.org/)
+- [Asset Forge](https://kenney.itch.io/assetforge)
 
 Other Tools Used:
 - [Paint.Net](https://www.getpaint.net/)
