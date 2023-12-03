@@ -23,7 +23,7 @@ element::element(int id)
     switch (this->ui_id)
     {
     case 0: // Tile Selector
-        img_file = "assets/textures/ui/tile_selector/tiles_empty.png";
+        img_file = "assets/textures/ui/tile_selector/tiles_none_selected.png";
         break;
     case 1: // Tool Selector
         img_file = "assets/textures/ui/tools_selector/tools_none_selected.png";
@@ -34,17 +34,17 @@ element::element(int id)
     case 3: // Time Bar
         img_file = "assets/textures/ui/time_bar/time_bar_empty.png";
             break;
-    case 5: // System Travel Port Tile Preview
-        img_file = "assets/textures/ui/tile_previews/stp_preview.png";
+    case 5: // System Launcher Tile Preview
+        img_file = "assets/textures/ui/tile_previews/sl_preview.png";
         break;
-    case 6: // Galaxy Travel Port Tile Preview
-        img_file = "assets/textures/ui/tile_previews/gtp_preview.png";
+    case 6: // Galaxy Launcher Tile Preview
+        img_file = "assets/textures/ui/tile_previews/gl_preview.png";
         break;
     case 7: // Housing Tile Preview
-        img_file = "assets/textures/ui/tile_previews/housing_preview.png";
+        img_file = "assets/textures/ui/tile_previews/hs_preview.png";
         break;
     case 8: // Mass Housing Tile Preview
-        img_file = "assets/textures/ui/tile_previews/mh_preview.png";
+        img_file = "assets/textures/ui/tile_previews/mhs_preview.png";
         break;
     case 9: // Ship Factory Tile Preview
         img_file = "assets/textures/ui/tile_previews/sf_preview.png";
@@ -53,7 +53,7 @@ element::element(int id)
         img_file = "assets/textures/ui/tile_previews/ps_preview.png";
         break;
     case 11: // Ship Store Tile Preview
-        img_file = "assets/textures/ui/tile_previews/ship_store_preview.png";
+        img_file = "assets/textures/ui/tile_previews/ss_preview.png";
         break;
     case 12: // Food Station Tile Preview
         img_file = "assets/textures/ui/tile_previews/fs_preview.png";
@@ -62,10 +62,13 @@ element::element(int id)
         img_file = "assets/textures/ui/tile_previews/ws_preview.png";
         break;
     case 14: // Bank Station Tile Preview
-        img_file = "assets/textures/ui/tile_previews/bank_preview.png";
+        img_file = "assets/textures/ui/tile_previews/bs_preview.png";
         break;
     case 15: // Amusement Park Tile Preview
-        img_file = "assets/textures/ui/tile_previews/park_preview.png";
+        img_file = "assets/textures/ui/tile_previews/ap_preview.png";
+        break;
+    case 16: // Holo Drive In Preview
+        img_file = "assets/textures/ui/tile_previews/hdi_preview.png";
         break;
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
@@ -104,6 +107,10 @@ element::element(int id)
         adjustmentY = -0.965f;
         size = 0.04f;
         break;
+    default:
+        adjustmentX = 0.0f;
+        adjustmentY = 0.0f;
+        size = 1.0f;
     }
     
     GLfloat vertices[] = {
@@ -154,7 +161,7 @@ void element::switch_img(int new_status)
         switch (new_status)
         {
         case 0: // Default/None Selected
-            new_img_file = "assets/textures/ui/tile_selector/tiles_empty.png";
+            new_img_file = "assets/textures/ui/tile_selector/tiles_none_selected.png";
             break;
         case 1:
             break;
@@ -241,10 +248,40 @@ void element::switch_img(int new_status)
 }
 
 // Function to render invidual ui element.
-void element::render(glm::vec3 camera_position, glm::vec3 camera_front)
+void element::render(glm::vec3 camera_position, glm::vec3 camera_front, GLFWwindow* window)
 {
+    GLint depth_func;
+    glGetIntegerv(GL_DEPTH_FUNC, &depth_func);
+
+    // Temporarily disable depth testing so text renders on top
+    glDisable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
+
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
+
+    if (this->ui_id > 4 && this->ui_id < 17)
+    {
+        double mouse_x, mouse_y;
+        glfwGetCursorPos(window, &mouse_x, &mouse_y);
+        float normalized_mouse_x = static_cast<float>(2.0 * mouse_x / monitor_settings->width - 1.0);
+        float normalized_mouse_y = static_cast<float>(-2.0 * mouse_y / monitor_settings->height + 1.0);
+        float adjusted_x = normalized_mouse_x;
+        float adjusted_y = normalized_mouse_y + 0.1f;
+
+        GLfloat size = 0.155f;
+
+        GLfloat vertices[] = {
+            -this->aspect_ratio * size + adjusted_x, -size + adjusted_y, 0.0f, 0.0f, 1.0f, // bottom left
+            -this->aspect_ratio * size + adjusted_x, size + adjusted_y, 0.0f, 0.0f, 0.0f, // top left
+            this->aspect_ratio * size + adjusted_x, size + adjusted_y, 0.0f, 1.0f, 0.0f, // bottom right
+            this->aspect_ratio * size + adjusted_x, -size + adjusted_y, 0.0f, 1.0f, 1.0f // top right
+        };
+
+        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    }
 
     glUseProgram(this->shader);
     glBindVertexArray(this->VAO);
@@ -260,6 +297,9 @@ void element::render(glm::vec3 camera_position, glm::vec3 camera_front)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(depth_func);
 }
 
 text_element::text_element(int id, std::string text)
@@ -411,8 +451,10 @@ void text_element::render()
 }
 
 // Class intialization function for a HUD object.
-HUD::HUD()
+HUD::HUD(GLFWwindow* window)
 {
+    this->window = window;
+    this->current_preview = -1;
     this->add_element(0);
     this->add_element(1);
     this->add_element(2);
@@ -426,8 +468,21 @@ HUD::HUD()
 // Function to add new UI element.
 void HUD::add_element(int element_id)
 {
-    element* new_element = new element(element_id);
-    this->all_elements.push_back(new_element);
+    if (element_id > 4 && element_id < 17)
+    {
+        if (current_preview == -1)
+        {
+            element* new_element = new element(element_id);
+            this->all_elements.push_back(new_element);
+            current_preview = element_id;
+        }
+    }
+    else
+    {
+        element* new_element = new element(element_id);
+        this->all_elements.push_back(new_element);
+    }
+
 }
 
 // Function to add new text UI element.
@@ -435,6 +490,17 @@ void HUD::add_text_element(int element_id, std::string default_text)
 {
     text_element* new_element = new text_element(element_id, default_text);
     this->all_text_elements.push_back(new_element);
+}
+
+void HUD::delete_preview()
+{
+    if (current_preview != -1)
+    {
+        for (element* elm : this->all_elements)
+            if (elm->ui_id == current_preview)
+                elm->should_render = false;
+        current_preview = -1;
+    }
 }
 
 // Function to update image of a ui element.
@@ -476,7 +542,7 @@ void HUD::render(glm::vec3 camera_position, glm::vec3 camera_front)
 {
     for (element* elm : this->all_elements)
         if (elm->should_render)
-            elm->render(camera_position, camera_front);
+            elm->render(camera_position, camera_front, this->window);
     for (text_element* elm : this->all_text_elements)
         if (elm->should_render)
             elm->render();

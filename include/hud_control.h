@@ -30,7 +30,7 @@ public:
 
 	element(int id);
 	void switch_img(int new_status);
-	void render(glm::vec3 camera_position, glm::vec3 camera_front);
+	void render(glm::vec3 camera_position, glm::vec3 camera_front, GLFWwindow* window);
 };
 
 class text_element
@@ -54,10 +54,13 @@ class HUD
 public:
 	std::vector<element*> all_elements;
 	std::vector<text_element*> all_text_elements;
+	GLFWwindow* window;
+	int current_preview;
 
-	HUD();
+	HUD(GLFWwindow* window);
 	void add_element(int element_id);
 	void add_text_element(int element_id, std::string default_text);
+	void delete_preview();
 	void update_element(int element_id, int new_status);
 	void update_text_element(int element_id, std::string new_text);
 	void hide_hud();

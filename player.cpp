@@ -107,6 +107,36 @@ void read_player_input(GLFWwindow* star_maps_window, bool& paused, float& game_s
 			game_ui->update_element(1, 1);
 	}
 
+	double mx, my;
+	glfwGetCursorPos(star_maps_window, &mx, &my);
+
+	if (mx > 100 && mx < 155 && my > 950 && my < 1005) // tile 1
+		game_ui->add_element(5);
+	else if (mx > 197 && mx < 251 && my > 950 && my < 1005) // tile 2
+		game_ui->add_element(6);
+	else if (mx > 293 && mx < 357 && my > 950 && my < 1005) // tile 3
+		game_ui->add_element(7);
+	else if (mx > 389 && mx < 444 && my > 950 && my < 1005) // tile 4
+		game_ui->add_element(8);
+	else if (mx > 484 && mx < 540 && my > 950 && my < 1005) // tile 5
+		game_ui->add_element(9);
+	else if (mx > 580 && mx < 636 && my > 950 && my < 1005) // tile 6
+		game_ui->add_element(10);
+	else if (mx > 100 && mx < 155 && my > 1015 && my < 1070) // tile 7
+		game_ui->add_element(11);
+	else if (mx > 197 && mx < 251 && my > 1015 && my < 1070) // tile 8
+		game_ui->add_element(12);
+	else if (mx > 293 && mx < 357 && my > 1015 && my < 1070) // tile 9
+		game_ui->add_element(13);
+	else if (mx > 389 && mx < 444 && my > 1015 && my < 1070) // tile 10
+		game_ui->add_element(14);
+	else if (mx > 484 && mx < 540 && my > 1015 && my < 1070) // tile 11
+		game_ui->add_element(15);
+	else if (mx > 580 && mx < 636 && my > 1015 && my < 1070) // tile 12
+		game_ui->add_element(16);
+	else
+		game_ui->delete_preview();
+
 	// Clamp the camera pitch to keep it oriented correctly:
 	if (camera_pitch > 89.0f)
 		camera_pitch = 89.0f;

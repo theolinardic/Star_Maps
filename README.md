@@ -1,6 +1,6 @@
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/logos/Logo_Idea3.png "Star Maps")
 # A game about building the perfect system.
-### Version: 0.50
+### Version: 0.70
 Created by Theodore Linardic for COP XXXX - Computer Graphics at the University of Central Florida.
 
 Star Maps brings a whole new spin on the City-Builder genre by letting *you* build the next great civilization in space!
@@ -13,7 +13,7 @@ Star Maps brings a whole new spin on the City-Builder genre by letting *you* bui
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png "Star Maps Control Layout for PC")
 
 ## Downloads
-...insert download for exe here...
+![<img src="https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/download_img.png">]("https://www.google.com")
 
 ## Outside Assets & Tools Used:
 
@@ -34,8 +34,6 @@ Assets:
 - [Solar System Scope's Textures](https://www.solarsystemscope.com/textures/)
 - [Star Chart Reference Image](https://framerusercontent.com/images/iFqcf8aTsBOnWxemfaIONObBGCk.png?scale-down-to=1024)
 - [Save Icon](https://icon-icons.com/icon/save-the-application-guardar/2396)
-- [Ark's PlayStation Buttons](https://arks.itch.io/ps4-buttons)
-- [Ark's Xbox Buttons](https://arks.itch.io/xbox-buttons)
 - [Kenneys City Kit (add-on for Asset Forge)](https://kenney.nl/assets/city-kit-commercial)
 - [Kenneys Space Kit (add-on for Asset Forge)](https://kenney.nl/assets/space-kit)
 - [Kenneys Conveyor Kit (add-on for Asset Forge)](https://kenney.nl/assets/conveyor-kit)

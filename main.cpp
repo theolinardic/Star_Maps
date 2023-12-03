@@ -47,7 +47,7 @@ int main()
 	// Start the brain of the game:
 	star_maps_game star_maps = star_maps_game(false, star_maps_window);
 
-	HUD* game_ui = new HUD();
+	HUD* game_ui = new HUD(star_maps_window);
 	int screenWidth, screenHeight;
 	double fps;
 	bool fullscreen = true;
