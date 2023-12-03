@@ -34,6 +34,39 @@ element::element(int id)
     case 3: // Time Bar
         img_file = "assets/textures/ui/time_bar/time_bar_empty.png";
             break;
+    case 5: // System Travel Port Tile Preview
+        img_file = "assets/textures/ui/tile_previews/stp_preview.png";
+        break;
+    case 6: // Galaxy Travel Port Tile Preview
+        img_file = "assets/textures/ui/tile_previews/gtp_preview.png";
+        break;
+    case 7: // Housing Tile Preview
+        img_file = "assets/textures/ui/tile_previews/housing_preview.png";
+        break;
+    case 8: // Mass Housing Tile Preview
+        img_file = "assets/textures/ui/tile_previews/mh_preview.png";
+        break;
+    case 9: // Ship Factory Tile Preview
+        img_file = "assets/textures/ui/tile_previews/sf_preview.png";
+        break;
+    case 10: // Power Station Tile Preview
+        img_file = "assets/textures/ui/tile_previews/ps_preview.png";
+        break;
+    case 11: // Ship Store Tile Preview
+        img_file = "assets/textures/ui/tile_previews/ship_store_preview.png";
+        break;
+    case 12: // Food Station Tile Preview
+        img_file = "assets/textures/ui/tile_previews/fs_preview.png";
+        break;
+    case 13: // Weapons Store Tile Preview
+        img_file = "assets/textures/ui/tile_previews/ws_preview.png";
+        break;
+    case 14: // Bank Station Tile Preview
+        img_file = "assets/textures/ui/tile_previews/bank_preview.png";
+        break;
+    case 15: // Amusement Park Tile Preview
+        img_file = "assets/textures/ui/tile_previews/park_preview.png";
+        break;
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
     }
