@@ -388,7 +388,7 @@ void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm:
 	if (this->paused)
 		game_speed_multiplier = 0.0f;
 	for (game_object* obj : this->entitiys)
-		obj->render(camera_position, camera_front, game_speed);
+		obj->render(camera_position, camera_front, game_speed, this->orbit_rings->ring_positions);
 	if (this->entitiys.size() != 0)
 		this->orbit_rings->render(camera_position, camera_front);
 }

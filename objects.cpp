@@ -153,7 +153,7 @@ float game_object::get_radius() {
 }
 
 // Function to render the game object. Will be called in the main game entity manager render loop.
-void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed)
+void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7])
 {
     // Initialize debug menu reference:
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -193,11 +193,12 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
     if (this->planet_entity_id < 8)
         model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
 
+    // If object is a 'preview' object that the player is preparing to place:
     if (this->parent == 0)
     {
         // Get mouse position
         double mouseX, mouseY;
-        glfwGetCursorPos(this->window, &mouseX, &mouseY); // Assuming 'window' is your GLFW window
+        glfwGetCursorPos(this->window, &mouseX, &mouseY);
 
         // Convert mouse position to world coordinates
         int screenWidth, screenHeight;
@@ -211,10 +212,27 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;
         glm::vec3 ray_direction = glm::normalize(glm::vec3(ray_world));
 
-        // Update object's position based on mouse world coordinates
-        this->position = camera_position + ray_direction * 200.05f; // Adjust 'some_distance_factor' as needed
+        float shortest = 999999999.0f;
+        glm::vec3 closest_point = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 ray_origin = (camera_position + camera_front);
+        for (int i = 0; i < 6; i++) {
+            for (const glm::vec3& vertex : ring_positions[i]) {
+                // Calculate the intersection point of the ray with the y = 0 plane
+                float t = -ray_origin.y / ray_direction.y;
+                glm::vec3 intersection_point = ray_origin + t * ray_direction;
 
-        // Update the model matrix with the new position
+                // Calculate the distance between the intersection point and the vertex on the ring:
+                float distance = glm::distance(intersection_point, vertex);
+
+                // If this point is closer, update the closest point:
+                if (distance < shortest) {
+                    shortest = distance;
+                    closest_point = vertex;
+                }
+            }
+        }
+        // Update the position of the preview object with the new location:
+        this->position = closest_point;
         model_matrix = glm::translate(glm::mat4(1.0f), this->position);
     }
 
@@ -353,10 +371,23 @@ void rings::render(const glm::vec3& camera_position, const glm::vec3& camera_fro
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(radiuses[i], radiuses[i], radiuses[i]));
+
+        // Save location of every vertex in the orbit rings for use later in object placement:
+        if (this->ring_positions[i].empty())
+        {
+            for (int j = 0; j < 360; j++) {
+                glm::vec4 vertex = model * glm::vec4(cos(glm::radians(static_cast<float>(j))), sin(glm::radians(static_cast<float>(j))), 0.0f, 1.0f);
+                glm::vec3 transformedPosition = glm::vec3(vertex.x, vertex.y, vertex.z);
+                this->ring_positions[i].push_back(transformedPosition);
+                std::cout << "ring " << i << " " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
+            }
+        }
+
         glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
         glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
         glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_LINE_LOOP, 0, 360);
+
     }
     glUseProgram(0);
 

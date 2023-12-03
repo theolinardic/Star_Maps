@@ -34,7 +34,7 @@ public:
     void load_texture(const char* texture_file);
     glm::vec3 get_center();
     float get_radius();
-    void render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed);
+    void render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7]);
     void render_bounding_box();
 };
 
@@ -42,6 +42,7 @@ class rings
 {
 public:
     GLuint shader, VAO, VBO;
+    std::vector<glm::vec3> ring_positions[7];
     rings();
     void render(const glm::vec3& camera_position, const glm::vec3& camera_front);
 };
