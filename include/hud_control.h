@@ -13,6 +13,13 @@
 #include FT_FREETYPE_H
 #include <objects.h>
 
+struct Character {
+	unsigned int texture_id;
+	glm::ivec2   size;
+	glm::ivec2   bearing;
+	unsigned int advance;
+};
+
 class element
 {
 public:
@@ -34,8 +41,11 @@ public:
 	GLuint texture_id, VAO, VBO, shader;
 	glm::vec2 position;
 	bool should_render;
+	float scale;
+	std::map<char, Character> chars;
 
 	text_element(int id, std::string text);
+	void update_text(std::string text);
 	void render();
 };
 
@@ -49,6 +59,7 @@ public:
 	void add_element(int element_id);
 	void add_text_element(int element_id, std::string default_text);
 	void update_element(int element_id, int new_status);
+	void update_text_element(int element_id, std::string new_text);
 	void hide_hud();
 	void show_hud();
 	void render(glm::vec3 camera_position, glm::vec3 camera_front);

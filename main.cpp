@@ -89,7 +89,7 @@ int main()
 		ImGui::NewFrame();
 
 		// Give core game logic the time passed since the last frame for its debug tools:
-		star_maps.update_debug_ingame_clock(glfwGetTime() - last_frame_time);
+		star_maps.update_ingame_clock(glfwGetTime() - last_frame_time, game_ui);
 		last_frame_time = glfwGetTime();
 
 		glm::vec3 front;

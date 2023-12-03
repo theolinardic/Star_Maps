@@ -265,54 +265,56 @@ void element::render(glm::vec3 camera_position, glm::vec3 camera_front)
 text_element::text_element(int id, std::string text)
 {
     // update with switch
-    if (id == 0)
-        this->position = glm::vec2(50.0f, 50.0f);
+    if (id == 0) // Time & Day Bar Text
+    {
+        this->position = glm::vec2(750.0f, 1055.0f);
+        this->scale = 0.50f;
+    }
+    if (id == 1) // Money Counter
+    {
+        this->position = glm::vec2(1568.0f, 22.0f);
+        this->scale = 0.50f;
+    }
+    if (id == 2) // Money Label
+    {
+        this->position = glm::vec2(1570.0f, 46.0f);
+        this->scale = 0.20f;
+    }
+        
+    this->text_id = id;
     this->text = text;
     this->should_render = true;
     this->shader = load_shader("shaders/text/vert.glsl", "shaders/text/frag.glsl");
     glUseProgram(this->shader);
 
-    // Generate texture for glyphs:
-   // glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &this->texture_id);
-    glBindTexture(GL_TEXTURE_2D, this->texture_id);
-    glUniform1i(glGetUniformLocation(this->shader, "text"), 0);
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
+    float w = monitor_settings->width;
+    float h = monitor_settings->height;
+    glm::mat4 projection = glm::ortho(0.0f, w, 0.0f, h);
 
-    // Setup buffers for text rendering (VAO, VBO):
-    glGenVertexArrays(1, &this->VAO);
-    glGenBuffers(1, &this->VBO);
-    glBindVertexArray(this->VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    // Define vertex attributes for text rendering:
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-    glEnableVertexAttribArray(0);
+    FT_Library ft;
+    FT_Face face;
+    if (FT_Init_FreeType(&ft) || FT_New_Face(ft, "assets/other/font_high_speed.ttf", 0, &face)) {
+        std::cout << "Failed to load font: font_high_speed.ttf" << std::endl;
+        return;
+    }
+    FT_Set_Pixel_Sizes(face, 0, 48);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-void text_element::render()
-{
-    glUseProgram(this->shader);
-    glBindVertexArray(this->VAO);
+    for (unsigned char c = 0; c < 128; c++)
+    {
 
-    for (auto character : this->text) {
-        // Load glyph for the current character:
-        FT_Library ft;
-        FT_Face face;
-        if (FT_Init_FreeType(&ft) || FT_New_Face(ft, "assets/other/font_high_speed.ttf", 0, &face)) {
-            std::cout << "Failed to load font: font_high_speed.ttf" << std::endl;
-            return;
-        }
-        FT_Set_Pixel_Sizes(face, 0, 48);
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            std::cout << "failed to load Glyph" << std::endl;
 
-        if (FT_Load_Char(face, character, FT_LOAD_RENDER)) {
-            std::cout << "Failed to load glyph" << std::endl;
-            continue;
-        }
 
-        // Generate texture for the current character:
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -325,38 +327,87 @@ void text_element::render()
             face->glyph->bitmap.buffer
         );
 
-        // Update vertex buffer with the current character's position and size:
-        float w = face->glyph->bitmap.width;
-        float h = face->glyph->bitmap.rows;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        GLfloat vertices[6][4] = {
-            { this->position.x,     this->position.y + h,   0.0, 0.0},
-            { this->position.x,     this->position.y,       0.0, 1.0 },
-            { this->position.x + w, this->position.y,       1.0, 1.0 },
+        Character character = {
+            texture,
+            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            face->glyph->advance.x
+        };
+        this->chars.insert(std::pair<char, Character>(c, character));
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-            { this->position.x,     this->position.y + h,   0.0, 0.0 },
-            { this->position.x + w, this->position.y,       1.0, 1.0 },
-            { this->position.x + w, this->position.y + h,   1.0, 0.0 }
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    // Setup buffers for text rendering (VAO, VBO):
+    glGenVertexArrays(1, &this->VAO);
+    glGenBuffers(1, &this->VBO);
+    glBindVertexArray(this->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void text_element::update_text(std::string text)
+{
+    this->text = text;
+}
+
+void text_element::render()
+{
+    GLint depth_func;
+    glGetIntegerv(GL_DEPTH_FUNC, &depth_func);
+
+    // Temporarily disable depth testing so text renders on top
+    glDisable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
+
+    glUseProgram(this->shader);
+    glUniform3f(glGetUniformLocation(this->shader, "textColor"), 1.0f, 1.0f, 1.0f);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(this->VAO);
+    glm::vec2 start_pos = this->position;
+
+    std::string::const_iterator c;
+
+    for (c = text.begin(); c != text.end(); c++)
+    {
+        Character ch = this->chars[*c];
+        float xpos = this->position.x + ch.bearing.x * scale;
+        float ypos = this->position.y - (ch.size.y - ch.bearing.y) * scale;
+        float w = ch.size.x * scale;
+        float h = ch.size.y * scale;
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
         };
 
-        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+        glBindTexture(GL_TEXTURE_2D, ch.texture_id);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // Advance cursors for next glyph
-        this->position.x += face->glyph->advance.x >> 6;
-
-        FT_Done_Face(face);
-        FT_Done_FreeType(ft);
+        this->position.x += (ch.advance >> 6) * scale;
     }
-
-    // Set text color to white:
-    glUniform3f(glGetUniformLocation(this->shader, "textColor"), 1.0f, 1.0f, 1.0f);
-
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(1920), 0.0f, static_cast<float>(1080));
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    this->position = start_pos;
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(depth_func);
 }
 
 // Class intialization function for a HUD object.
@@ -367,7 +418,9 @@ HUD::HUD()
     this->add_element(2);
     this->add_element(3);
 
-    this->add_text_element(0, "Time: Test");
+    this->add_text_element(0, "Day 0        12:00:00");
+    this->add_text_element(1, "500,000,000");
+    this->add_text_element(2, "Available Credits");
 }
 
 // Function to add new UI element.
@@ -390,6 +443,14 @@ void HUD::update_element(int element_id, int new_status)
     for (element* elm : this->all_elements)
         if (elm->ui_id == element_id)
             elm->switch_img(new_status);
+}
+
+// Function to update text of a ui element.
+void HUD::update_text_element(int element_id, std::string new_text)
+{
+    for (text_element* elm : this->all_text_elements)
+        if (elm->text_id == element_id)
+            elm->update_text(new_text);
 }
 
 // Function to hide all hud elements.

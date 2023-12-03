@@ -16,9 +16,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <SOIL2/SOIL2.h>
+#include <sstream>
 #include <json.hpp>
 #include <objects.h>
 #include <player.h>
+#include <hud_control.h>
 
 #define SETTINGS_FILE_LOCATION "settings.json"
 
@@ -53,7 +55,7 @@ public:
 	std::vector<json> preview_saves();
 	void update_save(int index, const json& new_data);
 	void give_money(int amount);
-	void update_debug_ingame_clock(float time_to_add);
+	void update_ingame_clock(float time_to_add, HUD* game_ui);
 	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed);
 	void spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location);
 	void despawn_entity(int entity_id);

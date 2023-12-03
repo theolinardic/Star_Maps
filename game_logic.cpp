@@ -314,7 +314,7 @@ void star_maps_game::give_money(int amount)
 }
 
 // Function to handle debug tools inside the game logic.
-void star_maps_game::update_debug_ingame_clock(float time_to_add)
+void star_maps_game::update_ingame_clock(float time_to_add, HUD* game_ui)
 {
 	// Update save data played timer if a save file is loaded and the game isn't paused:
 	if (loaded_save && !paused)
@@ -351,7 +351,25 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 			this->in_game_hour = 0;
 		}
 	}
-	
+	// Format output for UI clock correctly:
+	std::stringstream hour;
+	hour << std::setfill('0') << std::setw(2) << static_cast<int>(this->in_game_hour);
+	std::stringstream min;
+	min << std::setfill('0') << std::setw(2) << static_cast<int>(this->in_game_minute);
+	std::stringstream sec;
+	sec << std::setfill('0') << std::setw(2) << static_cast<int>(this->in_game_second);
+	std::stringstream formatted_time;
+	formatted_time << hour.str() << ":" << min.str() << ":" << sec.str();
+	std::string clock_text = "Day " + std::to_string(this->sols_passed) + "        " + formatted_time.str();
+
+	// Format output for UI money display correctly:
+	std::string money = std::to_string(static_cast<int>(this->player_money));
+	for (int i = money.length() - 3; i > 0; i -= 3)
+		money.insert(i, ",");
+
+	game_ui->update_text_element(0, clock_text);
+	game_ui->update_text_element(1, money);
+
 	// Set up debug values for development tests:
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::Text("Spawned Entitys: %d", this->num_entitys);
@@ -364,10 +382,10 @@ void star_maps_game::update_debug_ingame_clock(float time_to_add)
 	ImGui::Text("Player Money: %.2f", this->player_money);
 	ImGui::SliderFloat("Cam Sens:", &sensitivity, 1.0f, 4.0f);
 	ImGui::SliderFloat("Move sens:", &movement_speed, 0.1f, 2.0f);
-	if (ImGui::Button("Give $1,000,000"))
-		this->give_money(1000000);
-	if (ImGui::Button("Subtract $1,000,000"))
-		this->give_money(-1000000);
+	if (ImGui::Button("Give $100,000,000"))
+		this->give_money(100000000);
+	if (ImGui::Button("Subtract $100,000,000"))
+		this->give_money(-100000000);
 	if (ImGui::Button("Gen New Save"))
 		create_new_save("easy", "test");
 	if (ImGui::Button("Load save 1"))
