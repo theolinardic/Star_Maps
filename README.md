@@ -12,7 +12,6 @@ Star Maps brings a whole new spin on the City-Builder genre by letting *you* bui
 ## PC Controls
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png "Star Maps Control Layout for PC")
 
-
 ## Downloads
 ...insert download for exe here...
 
@@ -32,7 +31,6 @@ Libraries:
 - [Blender](https://www.blender.org/)
 - [Asset Forge](https://kenney.itch.io/assetforge)
 
-
 Images/Textures/Models:
 - [Wenrexa's SciFi Minimalism UI Pack](https://wenrexa.itch.io/kit-nesia2)
 - [Prinble's Hi-Tech Buttons Pack I](https://prinbles.itch.io/hi-tech-buttons-pack-i)
@@ -41,7 +39,9 @@ Images/Textures/Models:
 - [Save Icon](https://icon-icons.com/icon/save-the-application-guardar/2396)
 - [Ark's PlayStation Buttons](https://arks.itch.io/ps4-buttons)
 - [Ark's Xbox Buttons](https://arks.itch.io/xbox-buttons)
-- [Kennys City Kit (add-on for Asset Forge)](https://kenney.nl/assets/city-kit-commercial)
+- [Kenneys City Kit (add-on for Asset Forge)](https://kenney.nl/assets/city-kit-commercial)
+- [Kenneys Space Kit (add-on for Asset Forge)](https://kenney.nl/assets/space-kit)
+- [Kenneys Conveyor Kit (add-on for Asset Forge)](https://kenney.nl/assets/conveyor-kit)
 
 Sounds:
 - [Ellr's Universal UI/Menu Soundpack](https://ellr.itch.io/universal-ui-soundpack)
