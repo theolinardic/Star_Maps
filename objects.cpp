@@ -379,7 +379,6 @@ void rings::render(const glm::vec3& camera_position, const glm::vec3& camera_fro
                 glm::vec4 vertex = model * glm::vec4(cos(glm::radians(static_cast<float>(j))), sin(glm::radians(static_cast<float>(j))), 0.0f, 1.0f);
                 glm::vec3 transformedPosition = glm::vec3(vertex.x, vertex.y, vertex.z);
                 this->ring_positions[i].push_back(transformedPosition);
-                std::cout << "ring " << i << " " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
             }
         }
 

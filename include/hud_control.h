@@ -29,20 +29,27 @@ public:
 class text_element
 {
 public:
+	int text_id;
 	std::string text;
+	GLuint texture_id, VAO, VBO, shader;
+	glm::vec2 position;
+	bool should_render;
 
-	text_element(int location, std::string text);
-	void render(glm::vec3 camera_position, glm::vec3 camera_front);
+	text_element(int id, std::string text);
+	void render();
 };
 
 class HUD
 {
 public:
 	std::vector<element*> all_elements;
-	bool should_render;
+	std::vector<text_element*> all_text_elements;
 
 	HUD();
 	void add_element(int element_id);
+	void add_text_element(int element_id, std::string default_text);
 	void update_element(int element_id, int new_status);
+	void hide_hud();
+	void show_hud();
 	void render(glm::vec3 camera_position, glm::vec3 camera_front);
 };
