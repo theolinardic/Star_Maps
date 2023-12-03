@@ -99,18 +99,10 @@ int main()
 		if (!io.WantCaptureMouse)
 			star_maps.read_player_input(camera_position, camera_front, camera_yaw, camera_pitch);
 
-		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_PRESS)
-			star_maps.last_frame_down = 3;
-		if (glfwGetKey(star_maps_window, GLFW_KEY_E) == GLFW_RELEASE && star_maps.last_frame_down == 3)
-		{
-			star_maps.last_frame_down = 0;
-			star_maps.spawn_entity(-1, 1, 0, glm::vec3(100, 100, 60));
-		}
-
 		// Render the skybox and call the entity manager from the game_logic which handles rendering of all spawned game objects:
 		SB.render(camera_position, camera_front);
 		game_ui->render(camera_position, camera_front);
-		star_maps.entity_manager(camera_position, camera_front, star_maps.game_speed_multiplier);
+		star_maps.entity_manager(camera_position, camera_front);
 
 		double mx, my;
 		glfwGetCursorPos(star_maps_window, &mx, &my);

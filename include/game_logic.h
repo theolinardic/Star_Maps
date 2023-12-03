@@ -49,7 +49,7 @@ public:
 	// 0 = none, 1 = left, 2 = right
 	int last_frame_down;
 
-	int current_tool;
+	int current_tool, placing;
 
 	star_maps_game(bool p, GLFWwindow* window, HUD* ui);
 	void reset_settings();
@@ -64,7 +64,7 @@ public:
 	void update_save(int index, const json& new_data);
 	void give_money(int amount);
 	void update_ingame_clock(float time_to_add, HUD* game_ui);
-	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed);
+	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front);
 	void spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location);
 	void despawn_entity(int entity_id);
 	void despawn_all_entities();
@@ -72,7 +72,7 @@ public:
 	void save_and_return_to_menu();
 	void close_game();
 	void read_player_input(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch);
-
+	bool purchase(int cost);
 };
 
 int diff_text_to_int(std::string diff);

@@ -16,6 +16,7 @@ star_maps_game::star_maps_game(bool p, GLFWwindow* window, HUD* ui)
 	this->in_game_second = 0.0;
 	this->window = window;
 	this->game_ui = ui;
+	this->placing = -1;
 
 	// Load all these from the file after the user picks a save:
 	this->player_money = 0.00;
@@ -402,12 +403,12 @@ void star_maps_game::update_ingame_clock(float time_to_add, HUD* game_ui)
 }
 
 // Function that handles the game speed and rendering of all game objects.
-void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed)
+void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front)
 {
 	if (this->paused)
 		game_speed_multiplier = 0.0f;
 	for (game_object* obj : this->entitiys)
-		obj->render(camera_position, camera_front, game_speed, this->orbit_rings->ring_positions);
+		obj->render(camera_position, camera_front, game_speed_multiplier, this->orbit_rings->ring_positions);
 	if (this->entitiys.size() != 0)
 		this->orbit_rings->render(camera_position, camera_front);
 }
@@ -456,16 +457,16 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->size_adjust = 1;
 		break;
 	case 3: // Holo Drive-In
-		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
-		new_ent->load_object("assets/objects/stations/holodrivein/holodrivein.obj");
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/holo_drive_in/holo_drive_in.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
 		new_ent->size_adjust = 1;
 		break;
-	case 4: // Road Start/End
-		new_ent->shader = load_shader("shaders/ships/vert.glsl", "shaders/ships/frag.glsl");
-		new_ent->load_object("assets/objects/stations/roadgate/road_gate.obj");
+	case 4: // System Launcher
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/system_launcher/system_launcher.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
@@ -584,47 +585,6 @@ void star_maps_game::close_game()
 	exit(0);
 }
 
-// Function to convert text value of difficulty to an integer.
-int diff_text_to_int(std::string diff)
-{
-	if (diff == "easy")
-		return 1;
-	else if (diff == "medium")
-		return 2;
-	else if (diff == "hard")
-		return 3;
-	else
-		return 4;
-}
-
-// Function to convert int value of difficulty to a string.
-std::string diff_int_to_text(int diff)
-{
-	if (diff == 1)
-		return "easy";
-	else if (diff == 2)
-		return "medium";
-	else if (diff == 3)
-		return "hard";
-	else
-		return "dev";
-}
-
-// Function to change between fullscreen and windowed mode.
-void switch_display_type(GLFWwindow* window, bool fullscreen)
-{
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
-	if (fullscreen)
-		glfwSetWindowMonitor(window, monitor, 0, 0, monitor_settings->width, monitor_settings->height, monitor_settings->refreshRate);
-	else
-		glfwSetWindowMonitor(window, nullptr, 0, 30, monitor_settings->width, monitor_settings->height - 71, monitor_settings->refreshRate);
-}
-
-float sensitivity = 1.0f;
-float movement_speed = 1.0f;
-bool show_debug = true;
-
 // Function to read player input and act based on it:
 void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch)
 {
@@ -670,42 +630,122 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 		double mx, my;
 		glfwGetCursorPos(this->window, &mx, &my);
 
-		if (mx > 840 && mx < 975 && my > 957 && my < 1067) // select tool
+		if (mx > 840 && mx < 975 && my > 957 && my < 1067)
 		{
+			// select tool
+			this->current_tool = 0;
 			game_ui->update_element(1, 1);
-
 		}
-
-		else if (mx > 1000 && mx < 1129 && my > 957 && my < 1067) // delete tool
+		else if (mx > 1000 && mx < 1129 && my > 957 && my < 1067)
+		{
+			// delete tool
+			this->current_tool = 1;
 			game_ui->update_element(1, 2);
-		else if (mx > 1167 && mx < 1292 && my > 957 && my < 1067) // save tool
+			game_ui->update_element(0, 0);
+		}
+		else if (mx > 1167 && mx < 1292 && my > 957 && my < 1067)
+		{
+			// save tool
 			game_ui->update_element(1, 0);
-		else if (mx > 1320 && mx < 1445 && my > 957 && my < 1067) // exit tool
+		}
+		else if (mx > 1320 && mx < 1445 && my > 957 && my < 1067)
+		{
+			// exit tool
 			glfwSetWindowShouldClose(this->window, 1);
-		else if (mx > 100 && mx < 155 && my > 950 && my < 1005) // tile 1
-			game_ui->update_element(0, 5);
-		else if (mx > 197 && mx < 251 && my > 950 && my < 1005) // tile 2
+		}
+		else if (mx > 100 && mx < 155 && my > 950 && my < 1005)
+		{
+			// system launcher
+			if (purchase(100000))
+			{
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 5);
+				this->current_tool = 0;
+				if (placing == -1)
+				{
+					placing = 5;
+					spawn_entity(-1, 1, 0, glm::vec3(100, 100, 60));
+				}
+			}
+			
+		}
+		else if (mx > 197 && mx < 251 && my > 950 && my < 1005)
+		{
+			// tile 2
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 7);
-		else if (mx > 293 && mx < 357 && my > 950 && my < 1005) // tile 3
+			this->current_tool = 0;
+		}
+		else if (mx > 293 && mx < 357 && my > 950 && my < 1005)
+		{
+			// tile 3
+			game_ui->update_element(1, 1);
+			this->current_tool = 0;
 			game_ui->update_element(0, 9);
-		else if (mx > 389 && mx < 444 && my > 950 && my < 1005) // tile 4
+		}
+		else if (mx > 389 && mx < 444 && my > 950 && my < 1005)
+		{
+			// tile 4
+			game_ui->update_element(1, 1);
+			this->current_tool = 0;
 			game_ui->update_element(0, 11);
-		else if (mx > 484 && mx < 540 && my > 950 && my < 1005) // tile 5
+		}
+		else if (mx > 484 && mx < 540 && my > 950 && my < 1005)
+		{
+			// tile 5
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 12);
-		else if (mx > 580 && mx < 636 && my > 950 && my < 1005) // tile 6
+		}
+		else if (mx > 580 && mx < 636 && my > 950 && my < 1005)
+		{
+			// tile 6
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 15);
-		else if (mx > 100 && mx < 155 && my > 1015 && my < 1070) // tile 7
+		}
+		else if (mx > 100 && mx < 155 && my > 1015 && my < 1070)
+		{
+			// tile 7
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 6);
-		else if (mx > 197 && mx < 251 && my > 1015 && my < 1070) // tile 8
+		}
+		else if (mx > 197 && mx < 251 && my > 1015 && my < 1070)
+		{
+			// tile 8
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 8);
-		else if (mx > 293 && mx < 357 && my > 1015 && my < 1070) // tile 9
+		}
+		else if (mx > 293 && mx < 357 && my > 1015 && my < 1070)
+		{
+			// tile 9
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 10);
-		else if (mx > 389 && mx < 444 && my > 1015 && my < 1070) // tile 10
+		}
+		else if (mx > 389 && mx < 444 && my > 1015 && my < 1070)
+		{
+			// tile 10
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 13);
-		else if (mx > 484 && mx < 540 && my > 1015 && my < 1070) // tile 11
+		}
+		else if (mx > 484 && mx < 540 && my > 1015 && my < 1070)
+		{
+			// tile 11
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 14);
-		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070) // tile 12
+		}
+		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070)
+		{
+			// tile 12
+			this->current_tool = 0;
+			game_ui->update_element(1, 1);
 			game_ui->update_element(0, 16);
+		}
 		else if (mx > 1145 && mx < 1166 && my >= 0 && my < 25) // pause
 		{
 			paused = true;
@@ -837,3 +877,55 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 		}
 	}
 }
+
+// Check if the player can afford item
+bool star_maps_game::purchase(int cost)
+{
+	if (this->player_money - cost < 0)
+		return false;
+	this->player_money -= cost;
+	return true;
+}
+
+
+// Function to convert text value of difficulty to an integer.
+int diff_text_to_int(std::string diff)
+{
+	if (diff == "easy")
+		return 1;
+	else if (diff == "medium")
+		return 2;
+	else if (diff == "hard")
+		return 3;
+	else
+		return 4;
+}
+
+// Function to convert int value of difficulty to a string.
+std::string diff_int_to_text(int diff)
+{
+	if (diff == 1)
+		return "easy";
+	else if (diff == 2)
+		return "medium";
+	else if (diff == 3)
+		return "hard";
+	else
+		return "dev";
+}
+
+// Function to change between fullscreen and windowed mode.
+void switch_display_type(GLFWwindow* window, bool fullscreen)
+{
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* monitor_settings = glfwGetVideoMode(monitor);
+	if (fullscreen)
+		glfwSetWindowMonitor(window, monitor, 0, 0, monitor_settings->width, monitor_settings->height, monitor_settings->refreshRate);
+	else
+		glfwSetWindowMonitor(window, nullptr, 0, 30, monitor_settings->width, monitor_settings->height - 71, monitor_settings->refreshRate);
+}
+
+float sensitivity = 1.0f;
+float movement_speed = 1.0f;
+bool show_debug = true;
+
