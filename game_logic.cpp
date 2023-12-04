@@ -30,6 +30,7 @@ star_maps_game::star_maps_game(bool p, GLFWwindow* window, HUD* ui)
 
 	// Set up ImGui debug tools:
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	this->spawned_recently = false;
 }
 // Function to reset all of the settings to the default 'safe' values.
 void star_maps_game::reset_settings() {
@@ -109,7 +110,7 @@ void star_maps_game::load_save(int index)
 	// Spawn in all game objects from the save data:
 	if (data.find("entities") != data.end())
 		for (const auto& entity : data["entities"])
-			spawn_entity(entity["obj_type"], entity["texture"], entity["parent"], glm::vec3(entity["location"]["X"], entity["location"]["Y"], entity["location"]["Z"]));
+			spawn_entity(entity["obj_type"], entity["texture"], entity["parent"], glm::vec3(entity["location"]["X"], entity["location"]["Y"], entity["location"]["Z"]), false);
 
 	this->loaded_save = true;
 }
@@ -412,16 +413,26 @@ void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm:
 		obj->render(camera_position, camera_front, game_speed_multiplier, this->orbit_rings->ring_positions, this->entitiys);
 	if (this->entitiys.size() != 0)
 		this->orbit_rings->render(camera_position, camera_front);
+
+	if (in_game_second > 30 && in_game_second < 31 && spawned_recently == false)
+	{
+		spawned_recently = true;
+		spawn_entity(2, 6, 8, glm::vec3(100, 100, 60), true);
+	}
+	if (spawned_recently == true && in_game_second > 31)
+	{
+		spawned_recently = false;
+	}
 }
 
 // Function to spawn a new game object with the passed in values.
-void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location)
+void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location, bool npc)
 {
 	this->num_entitys = this->entitiys.size();
 	long int new_entity_id = ++this->num_entitys;
 	
 	std::cout << "Spawning new entity of type " << type << ". - ID: " << new_entity_id << std::endl;
-	game_object* new_ent = new game_object(this->window);
+	game_object* new_ent = new game_object(this->window, npc);
 
 	// Depending on the object type passed in, different shaders and obj files will be loaded:
 	switch (type) {
@@ -519,6 +530,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->orbit_speed = orbit_speeds[new_entity_id - 2];
 		new_ent->size_adjust = size_changes[new_entity_id - 2];
 	}
+
 	// Make sure the shader loaded correctly; print out errors if any are found:
 	glUseProgram(new_ent->shader);
 	int success;
@@ -536,6 +548,12 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 	for (game_object* obj : this->entitiys)
 		if (obj->planet_entity_id == parent_in)
 			new_ent->parent_planet = obj;
+
+	if (new_ent->parent == 0)
+		new_ent->is_preview = true;
+	else
+		new_ent->is_preview = false;
+	new_ent->is_npc = npc;
 	entitiys.push_back(new_ent);
 }
 
@@ -591,7 +609,14 @@ void star_maps_game::close_game()
 
 // Function to read player input and act based on it:
 void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch)
+
 {
+	for (game_object* obj : this->entitiys)
+		if (obj->is_preview)
+			placing = true;
+	if(!placing)
+		game_ui->update_element(0, 0);
+
 	if (glfwGetKey(this->window, GLFW_KEY_W) == GLFW_PRESS) // Move forward
 		camera_position += movement_speed * camera_front;
 	if (glfwGetKey(this->window, GLFW_KEY_S) == GLFW_PRESS) // Move backward
@@ -630,6 +655,7 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 
 	if (glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && last_frame_down == 1)
 	{
+		std::cout << placing << std::endl;
 		last_frame_down = 0;
 		double mx, my;
 		glfwGetCursorPos(this->window, &mx, &my);
@@ -668,7 +694,7 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				if (placing == -1)
 				{
 					placing = 5;
-					spawn_entity(4, 7, 0, glm::vec3(100, 100, 60));
+					spawn_entity(4, 7, 0, glm::vec3(100, 100, 60), false);
 				}
 			}
 			
@@ -818,6 +844,18 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 			this->in_menu = false;
 			this->load_save(0);
 		}
+		// If placing an object, set preview to false and object code handles placing:
+		else if (placing)
+		{
+			for (game_object* obj : this->entitiys)
+				if (obj->is_preview)
+				{
+					obj->is_preview = false;
+					placing = false;
+					printf("attmpt placing\n");
+				}
+		 }
+					
 		// Reset tool bar to place in case player started to click on save/quit but then moved the mouse:
 		else
 		{

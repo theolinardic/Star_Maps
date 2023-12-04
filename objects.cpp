@@ -1,7 +1,8 @@
 #include <objects.h>
+#include <random>
 
-// Class initialization function for game objects.
-game_object::game_object(GLFWwindow *window)
+// Class initialization function for NPC game objects.
+game_object::game_object(GLFWwindow* window, bool is_npc)
 {
     this->VAO = 0;
     this->EBO = 0;
@@ -14,6 +15,11 @@ game_object::game_object(GLFWwindow *window)
     this->position = glm::vec3(0.0, 0.0, 0.0);
     this->render_bb = false;
     this->window = window;
+
+    this->time_to_fly = 30.0f;
+    this->is_npc = is_npc;
+    this->start_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    this->end_pos = glm::vec3(1000.0f, 0.0f, 1000.0f);
 }
 
 // Function to load obj files for game objects using Assimp.
@@ -152,6 +158,35 @@ float game_object::get_radius() {
     return maxDistance;
 }
 
+void game_object::get_rand_pars(std::vector<game_object*> entitiys)
+{
+    if (this->end_par == -1)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        int lower_bound = 2;
+        int upper_bound = 7;
+
+        std::uniform_int_distribution<int> distribution(lower_bound, upper_bound);
+
+        this->start_par = distribution(gen);
+        this->end_par = distribution(gen);
+
+        while (this->end_par == this->start_par)
+            this->end_par = distribution(gen);
+    }
+    
+    for (game_object* obj : entitiys)
+    {
+        if (this->start_pos == glm::vec3(0.0f,0.0f,0.0f))
+            if (obj->planet_entity_id == this->start_par)
+                this->start_pos = obj->position;
+        if (obj->planet_entity_id == this->end_par)
+            this->end_pos = obj->position;
+    }
+}
+
 // Function to render the game object. Will be called in the main game entity manager render loop.
 void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7], std::vector<game_object*> entitiys)
 {
@@ -172,7 +207,7 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
 
     // Every object will orbit around its parent object. (Besides the sun, hence why I start at entity 2) Here is where the 
     // new position of each object on its orbit path is calculated:
-    if (this->planet_entity_id > 1 && this->parent != 0)
+    if (this->planet_entity_id > 1 && this->parent != 0 && this->is_npc == false)
     {
         // Find the center of the objects parent:
         glm::vec3 parent_planet_center = this->parent_planet->get_center();
@@ -196,7 +231,6 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
     // If object is a 'preview' object that the player is preparing to place:
     if (this->parent == 0)
     {
-        this->is_preview = true;
         // Get mouse position
         double mouseX, mouseY;
         glfwGetCursorPos(this->window, &mouseX, &mouseY);
@@ -216,6 +250,7 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         float shortest = 999999999.0f;
         glm::vec3 closest_point = glm::vec3(0.0f, 0.0f, 0.0f);
         int closest_ring = -1;
+        int closest_parent_id = -1;
         glm::vec3 ray_origin = (camera_position + camera_front);
         for (int i = 0; i < 6; i++) {
             for (const glm::vec3& vertex : ring_positions[i]) {
@@ -240,6 +275,7 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
             // Simple Collision detection with planet on the closest ring
             if (obj->planet_entity_id == closest_ring + 2)
             {
+                closest_parent_id = obj->planet_entity_id;
                 float dis = glm::distance(closest_point, obj->position);
                 if (dis < 26.0f)  // Planet 1 
                 {
@@ -252,6 +288,42 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
             }
         }
 
+        // if objects parent is 0 but preview has been turned off, check for item placement
+        if (this->is_preview == false && this->parent == 0)
+        {
+            if (ok_place)
+            {
+                switch (closest_ring)
+                {
+                case 0:
+                    this->orbit_radius = 100;
+                    break;
+                case 1:
+                    this->orbit_radius = 200;
+                    break;
+                case 2:
+                    this->orbit_radius = 300;
+                    break;
+                case 3:
+                    this->orbit_radius = 400;
+                    break;
+                case 4:
+                    this->orbit_radius = 500;
+                    break;
+                case 5:
+                    this->orbit_radius = 600;
+                    break;
+                }
+                this->parent = closest_parent_id;
+                this->size_adjust = 0.2f;
+                for (game_object* obj : entitiys)
+                    if (obj->planet_entity_id == 1)
+                        this->parent_planet = obj;
+                this->orbit_speed = this->parent_planet->orbit_speed;
+            }   
+            else
+                this->is_preview = true;
+        }
         // change if obj should be red or not if invalid placement location:
         glUniform1i(glGetUniformLocation(this->shader, "ok_place"),ok_place);
 
@@ -261,6 +333,26 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
     }
 
+    // NPC spawns:
+    if (this->is_npc)
+    {
+        this->get_rand_pars(entitiys);
+        if (time_exist < time_to_fly)
+        { 
+            glm::vec3 direction = end_pos - this->position;
+            float t = glm::clamp(time_exist / time_to_fly, 0.0f, 1.0f);
+            this->position = glm::mix(start_pos, end_pos, t);
+
+            float yaw = atan2(-direction.z, direction.x);
+            float pitch = asin(direction.y / glm::length(direction));
+
+            model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
+            model_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model_matrix = glm::rotate(model_matrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+            model_matrix = glm::rotate(model_matrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+        }
+        // add despawn for these
+    }
     // Find the view matrix and projection with the passed in camera position and camera front references:
     float fov = 45.0f;
     glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));

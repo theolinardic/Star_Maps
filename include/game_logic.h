@@ -49,6 +49,7 @@ public:
 	// 0 = none, 1 = left, 2 = right
 	int last_frame_down;
 	bool in_menu;
+	bool spawned_recently;
 
 	int current_tool, placing;
 
@@ -66,7 +67,7 @@ public:
 	void give_money(int amount);
 	void update_ingame_clock(float time_to_add, HUD* game_ui);
 	void entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front);
-	void spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location);
+	void spawn_entity(int type, int texture_id, int parent_in, glm::vec3 location, bool npc);
 	void despawn_entity(int entity_id);
 	void despawn_all_entities();
 	void switch_camera_mode(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch, int view_switch);

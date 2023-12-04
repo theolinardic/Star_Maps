@@ -29,11 +29,19 @@ public:
     GLuint VAO, VBO, EBO, textureID, shader;
     GLFWwindow* window;
 
-    game_object(GLFWwindow* window);
+    bool is_npc;
+    float time_to_fly;
+    glm::vec3 start_pos = glm::vec3(0.0f,0.0f,0.0f);
+    glm::vec3 end_pos;
+    int start_par = -1;
+    int end_par = -1;
+
+    game_object(GLFWwindow* window, bool is_npc);
     void load_object(const char* obj_file);
     void load_texture(const char* texture_file);
     glm::vec3 get_center();
     float get_radius();
+    void get_rand_pars(std::vector<game_object*> entitiys);
     void render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7], std::vector<game_object*> entitiys);
     void render_bounding_box();
 };
