@@ -10,6 +10,7 @@ out vec4 fragColor;
 
 uniform float rotation_angle;
 uniform sampler2D textureSampler;
+uniform bool ok_place;
 
 void main() {
     vec3 norm = normalize(fragNormal);
@@ -21,11 +22,14 @@ void main() {
 
     vec4 texColor = texture(textureSampler, rotatedTexCoord);
     
-    // Apply red tint
-    texColor.r += 0.5;
-    texColor.g -= 0.25;
-    texColor.b -= 0.25;
-
+    if (ok_place == false)
+    {
+        // Apply red tint
+        texColor.r += 0.5;
+        texColor.g -= 0.25;
+        texColor.b -= 0.25;
+    }
+    
     // Apply transparency
     texColor.a *= 0.5;
 

@@ -48,6 +48,7 @@ public:
 	HUD* game_ui;
 	// 0 = none, 1 = left, 2 = right
 	int last_frame_down;
+	bool in_menu;
 
 	int current_tool, placing;
 

@@ -153,7 +153,7 @@ float game_object::get_radius() {
 }
 
 // Function to render the game object. Will be called in the main game entity manager render loop.
-void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7])
+void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7], std::vector<game_object*> entitiys)
 {
     // Initialize debug menu reference:
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -196,13 +196,14 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
     // If object is a 'preview' object that the player is preparing to place:
     if (this->parent == 0)
     {
+        this->is_preview = true;
         // Get mouse position
         double mouseX, mouseY;
         glfwGetCursorPos(this->window, &mouseX, &mouseY);
 
         // Convert mouse position to world coordinates
         int screenWidth, screenHeight;
-        glfwGetWindowSize(window, &screenWidth, &screenHeight);
+        glfwGetWindowSize(this->window, &screenWidth, &screenHeight);
         float normalizedX = (2.0f * mouseX) / screenWidth - 1.0f;
         float normalizedY = 1.0f - (2.0f * mouseY) / screenHeight;
 
@@ -211,9 +212,10 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
         glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;
         glm::vec3 ray_direction = glm::normalize(glm::vec3(ray_world));
-
+        bool ok_place = true;
         float shortest = 999999999.0f;
         glm::vec3 closest_point = glm::vec3(0.0f, 0.0f, 0.0f);
+        int closest_ring = -1;
         glm::vec3 ray_origin = (camera_position + camera_front);
         for (int i = 0; i < 6; i++) {
             for (const glm::vec3& vertex : ring_positions[i]) {
@@ -228,9 +230,31 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
                 if (distance < shortest) {
                     shortest = distance;
                     closest_point = vertex;
+                    closest_ring = i;
                 }
             }
         }
+        // check for collision with planets and move to orbit planet instead 
+        for (game_object* obj : entitiys)
+        {
+            // Simple Collision detection with planet on the closest ring
+            if (obj->planet_entity_id == closest_ring + 2)
+            {
+                float dis = glm::distance(closest_point, obj->position);
+                if (dis < 26.0f)  // Planet 1 
+                {
+                    ok_place = false;
+                    closest_point = obj->position;
+                    closest_point.y = 80.0f;
+                }
+                else
+                    ok_place = true;
+            }
+        }
+
+        // change if obj should be red or not if invalid placement location:
+        glUniform1i(glGetUniformLocation(this->shader, "ok_place"),ok_place);
+
         // Update the position of the preview object with the new location:
         this->position = closest_point;
         model_matrix = glm::translate(glm::mat4(1.0f), this->position);

@@ -19,7 +19,7 @@
 class game_object {
 public:
     int planet_entity_id, indices_count, parent, orbit_location;
-    bool render_bb;
+    bool render_bb, is_preview;
     float rotation_speed, size_adjust, orbit_radius, orbit_speed, time_exist, last_frame_time;
     glm::vec3 position, orbit_center, boundingBoxMin, boundingBoxMax;
     glm::mat4 model_matrix, parent_mm, view_matrix, projection_matrix;
@@ -34,7 +34,7 @@ public:
     void load_texture(const char* texture_file);
     glm::vec3 get_center();
     float get_radius();
-    void render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7]);
+    void render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7], std::vector<game_object*> entitiys);
     void render_bounding_box();
 };
 

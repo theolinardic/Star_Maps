@@ -17,6 +17,7 @@ star_maps_game::star_maps_game(bool p, GLFWwindow* window, HUD* ui)
 	this->window = window;
 	this->game_ui = ui;
 	this->placing = -1;
+	this->in_menu = true;
 
 	// Load all these from the file after the user picks a save:
 	this->player_money = 0.00;
@@ -408,7 +409,7 @@ void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm:
 	if (this->paused)
 		game_speed_multiplier = 0.0f;
 	for (game_object* obj : this->entitiys)
-		obj->render(camera_position, camera_front, game_speed_multiplier, this->orbit_rings->ring_positions);
+		obj->render(camera_position, camera_front, game_speed_multiplier, this->orbit_rings->ring_positions, this->entitiys);
 	if (this->entitiys.size() != 0)
 		this->orbit_rings->render(camera_position, camera_front);
 }
@@ -499,6 +500,9 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		break;
 	case 6:
 		new_ent->load_texture("assets/objects/ships/ship_1/textures/ship_1.png");
+		break;
+	case 7:
+		new_ent->load_texture("assets/objects/stations/system_launcher/system_launcher.png");
 		break;
 	default:
 		std::cout << "Error: invalid texture id: " << texture_id << std::endl;
@@ -664,8 +668,7 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				if (placing == -1)
 				{
 					placing = 5;
-					std::cout << "test" << std::endl;
-					spawn_entity(4, 1, 0, glm::vec3(100, 100, 60));
+					spawn_entity(4, 7, 0, glm::vec3(100, 100, 60));
 				}
 			}
 			
@@ -801,9 +804,26 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 			this->game_speed_multiplier *= 2.0f;
 			game_ui->update_element(3, 3);
 		}
+		else if (mx > 701 && mx < 1217 && my >= 700 && my < 808 && this->in_menu) // new game
+		{
+			game_ui->start_game();
+			game_ui->update_element(18, 1);
+			this->in_menu = false;
+			this->create_new_save("easy", "test");
+		}
+		else if (mx > 701 && mx < 1217 && my >= 809 && my < 917 && this->in_menu) // load game
+		{
+			game_ui->start_game();
+			game_ui->update_element(18, 2);
+			this->in_menu = false;
+			this->load_save(0);
+		}
 		// Reset tool bar to place in case player started to click on save/quit but then moved the mouse:
 		else
+		{
 			game_ui->update_element(1, 1);
+		}
+			
 	}
 
 	double mx, my;
@@ -833,6 +853,10 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 		game_ui->add_element(14);
 	else if (mx > 580 && mx < 636 && my > 1015 && my < 1070) // tile 12
 		game_ui->add_element(16);
+	else if (mx > 701 && mx < 1217 && my >= 700 && my < 808 && this->in_menu) // new game
+		game_ui->update_element(18, 1);
+	else if (mx > 701 && mx < 1217 && my >= 809 && my < 917 && this->in_menu) // load game
+		game_ui->update_element(18, 2);
 	else
 		game_ui->delete_preview();
 

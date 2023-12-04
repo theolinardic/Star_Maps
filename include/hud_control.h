@@ -57,8 +57,11 @@ public:
 	std::vector<text_element*> all_text_elements;
 	GLFWwindow* window;
 	int current_preview;
+	bool in_menu;
 
 	HUD(GLFWwindow* window);
+	void start_menu();
+	void start_game();
 	void add_element(int element_id);
 	void add_text_element(int element_id, std::string default_text);
 	void delete_preview();

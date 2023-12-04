@@ -71,6 +71,12 @@ element::element(int id)
     case 16: // Amusement Park Tile Preview
         img_file = "assets/textures/ui/tile_previews/ap_preview.png";
         break;
+    case 17: // Menu Logo
+        img_file = "assets/images/logos/final_logo.png";
+        break;
+    case 18: // Menu new/load save buttons
+        img_file = "assets/textures/ui/menu_buttons/menu_default.png";
+        break;
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
     }
@@ -107,6 +113,16 @@ element::element(int id)
         adjustmentX = 0.0f;
         adjustmentY = -0.965f;
         size = 0.04f;
+        break;
+    case 17: // Menu Logo
+        adjustmentX = 0.0f;
+        adjustmentY = -0.45f;
+        size = 0.5f;
+        break;
+    case 18: // Menu new/load save
+        adjustmentX = 0.0f;
+        adjustmentY = 0.5f;
+        size = 0.2f;
         break;
     default: // Preview tiles
         adjustmentX = 1.09f;
@@ -270,6 +286,19 @@ void element::switch_img(int new_status)
             std::cout << "Error status type: " << new_status << " on ui id: " << this->ui_id << "is not valid." << std::endl;
         }
         break;
+    case 18: // Save Menu button
+        switch (new_status)
+        {
+        case 0: // default
+            new_img_file = "assets/textures/ui/menu_buttons/menu_default.png";
+            break;
+        case 1: // hovering over new game
+            new_img_file = "assets/textures/ui/menu_buttons/menu_new.png";
+            break;
+        case 2: // hovering over save game
+            new_img_file = "assets/textures/ui/menu_buttons/menu_load.png";
+            break;
+        }
     default:
         std::cout << "Error. ui id type: " << this->ui_id << " is not valid." << std::endl;
     }
@@ -463,6 +492,21 @@ HUD::HUD(GLFWwindow* window)
 {
     this->window = window;
     this->current_preview = -1;
+    this->start_menu();
+}
+
+void HUD::start_menu()
+{
+    this->in_menu = true;
+    this->add_element(17);
+    this->add_element(18);
+}
+
+void HUD::start_game()
+{
+    this->in_menu = false;
+    for (element* elm : this->all_elements)
+        elm->should_render = false;
     this->add_element(0);
     this->add_element(1);
     this->add_element(2);
