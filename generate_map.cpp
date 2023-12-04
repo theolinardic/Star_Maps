@@ -95,14 +95,14 @@ skybox::skybox()
 	// Define the vertices/indices for the skybox:
 	GLfloat vertices[] =
 	{
-		-1500.0f, -1500.0f, 1500.0f,
-		1500.0f, -1500.0f, 1500.0f,
-		1500.0f, -1500.0f, -1500.0f,
-		-1500.0f, -1500.0f, -1500.0f,
-		-1500.0f, 1500.0f, 1500.0f,
-		1500.0f, 1500.0f, 1500.0f,
-		1500.0f, 1500.0f, -1500.0f,
-		-1500.0f, 1500.0f, -1500.0f,
+		-2500.0f, -2500.0f, 2500.0f,
+		2500.0f, -2500.0f, 2500.0f,
+		2500.0f, -2500.0f, -2500.0f,
+		-2500.0f, -2500.0f, -2500.0f,
+		-2500.0f, 2500.0f, 2500.0f,
+		2500.0f, 2500.0f, 2500.0f,
+		2500.0f, 2500.0f, -2500.0f,
+		-2500.0f, 2500.0f, -2500.0f,
 	};
 	GLuint indices[] =
 	{
@@ -162,7 +162,7 @@ void skybox::render(glm::vec3 camera_position, glm::vec3 camera_front)
 	glUniform1i(glGetUniformLocation(this->shader, "skybox"), 0);
 
 	// Define view and projection matrices of the skybox from the camera FOV, position, front, and the windows aspect ratio:
-	glm::mat4 projection_matrix = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 4000.0f);
+	glm::mat4 projection_matrix = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 10000.0f);
 	glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	// Pass view and projection matrices to the skybox shader:

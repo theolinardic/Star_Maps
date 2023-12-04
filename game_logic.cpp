@@ -470,7 +470,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
-		new_ent->size_adjust = 1;
+		new_ent->size_adjust = 5.0f;
 		break;
 	default:
 		std::cout << "Error: invalid type: " << type << std::endl;
@@ -664,87 +664,121 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				if (placing == -1)
 				{
 					placing = 5;
-					spawn_entity(-1, 1, 0, glm::vec3(100, 100, 60));
+					std::cout << "test" << std::endl;
+					spawn_entity(4, 1, 0, glm::vec3(100, 100, 60));
 				}
 			}
 			
 		}
 		else if (mx > 197 && mx < 251 && my > 950 && my < 1005)
 		{
-			// tile 2
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 7);
-			this->current_tool = 0;
+			// housing tile
+			if (purchase(8000000))
+			{
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 7);
+				this->current_tool = 0;
+			}
 		}
 		else if (mx > 293 && mx < 357 && my > 950 && my < 1005)
 		{
-			// tile 3
-			game_ui->update_element(1, 1);
-			this->current_tool = 0;
-			game_ui->update_element(0, 9);
+			// power station
+			if (purchase(25000000))
+			{
+				game_ui->update_element(1, 1);
+				this->current_tool = 0;
+				game_ui->update_element(0, 9);
+			}
 		}
 		else if (mx > 389 && mx < 444 && my > 950 && my < 1005)
 		{
-			// tile 4
-			game_ui->update_element(1, 1);
-			this->current_tool = 0;
-			game_ui->update_element(0, 11);
+			// ship store
+			if (purchase(10000000))
+			{
+				game_ui->update_element(1, 1);
+				this->current_tool = 0;
+				game_ui->update_element(0, 11);
+			}
 		}
 		else if (mx > 484 && mx < 540 && my > 950 && my < 1005)
 		{
-			// tile 5
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 12);
+			// food store
+			if (purchase(8000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 12);
+			}
 		}
 		else if (mx > 580 && mx < 636 && my > 950 && my < 1005)
 		{
-			// tile 6
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 15);
+			// holo drive in
+			if (purchase(25000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 15);
+			}
 		}
 		else if (mx > 100 && mx < 155 && my > 1015 && my < 1070)
 		{
-			// tile 7
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 6);
+			// galaxy launcher
+			if (purchase(10000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 6);
+			}
 		}
 		else if (mx > 197 && mx < 251 && my > 1015 && my < 1070)
 		{
-			// tile 8
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 8);
+			// mass housing
+			if (purchase(100000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 8);
+			}
 		}
 		else if (mx > 293 && mx < 357 && my > 1015 && my < 1070)
 		{
-			// tile 9
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 10);
+			// ship factory
+			if (purchase(50000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 10);
+			}
 		}
 		else if (mx > 389 && mx < 444 && my > 1015 && my < 1070)
 		{
-			// tile 10
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 13);
+			// weapons store
+			if (purchase(8000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 13);
+			}
 		}
 		else if (mx > 484 && mx < 540 && my > 1015 && my < 1070)
 		{
-			// tile 11
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 14);
+			// bank
+			if (purchase(5000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 14);
+			}
 		}
 		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070)
 		{
-			// tile 12
-			this->current_tool = 0;
-			game_ui->update_element(1, 1);
-			game_ui->update_element(0, 16);
+			// amusement park
+			if (purchase(100000000))
+			{
+				this->current_tool = 0;
+				game_ui->update_element(1, 1);
+				game_ui->update_element(0, 16);
+			}
 		}
 		else if (mx > 1145 && mx < 1166 && my >= 0 && my < 25) // pause
 		{

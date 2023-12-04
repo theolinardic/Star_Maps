@@ -234,6 +234,7 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         // Update the position of the preview object with the new location:
         this->position = closest_point;
         model_matrix = glm::translate(glm::mat4(1.0f), this->position);
+        model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
     }
 
     // Find the view matrix and projection with the passed in camera position and camera front references:
