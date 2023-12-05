@@ -1,19 +1,13 @@
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/logos/Logo_Idea3.png "Star Maps")
 # A game about building the perfect system.
-### Version: 0.70
+### Version: 1.0
 Created by Theodore Linardic for COP XXXX - Computer Graphics at the University of Central Florida.
 
 Star Maps brings a whole new spin on the City-Builder genre by letting *you* build the next great civilization in space!
 
-... include more info in description....
-
-... add screenshots / gameplay video ...
 
 ## PC Controls
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png "Star Maps Control Layout for PC")
-
-## Downloads
-![<img src="https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/download_img.png">]("https://www.google.com")
 
 ## Outside Assets & Tools Used:
 
@@ -37,7 +31,6 @@ Assets:
 - [Kenneys City Kit (add-on for Asset Forge)](https://kenney.nl/assets/city-kit-commercial)
 - [Kenneys Space Kit (add-on for Asset Forge)](https://kenney.nl/assets/space-kit)
 - [Kenneys Conveyor Kit (add-on for Asset Forge)](https://kenney.nl/assets/conveyor-kit)
-- [Ellr's Universal UI/Menu Soundpack](https://ellr.itch.io/universal-ui-soundpack)
 - [High Speed Font](https://www.dafont.com/high-speed-3.font)
 
 3D Objects Created Using:
