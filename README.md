@@ -1,4 +1,4 @@
-![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/logos/Logo_Idea3.png "Star Maps")
+![alt text](https://raw.githubusercontent.com/theolinardic/Star_Maps/main/assets/images/logos/Logo_Idea3.png "Star Maps")
 # A game about building the perfect system.
 ### Version: 1.0
 Created by Theodore Linardic for CAP 4720 - Computer Graphics at the University of Central Florida.
@@ -7,13 +7,18 @@ Star Maps brings a whole new spin on the City-Builder genre by letting *you* bui
 
 
 ## PC Controls
-![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png "Star Maps Control Layout for PC")
+![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png?raw=true "Star Maps Control Layout for PC")
 
 ## Screenshots and Video Demonstration
-![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex1.png "Star Maps Main Game Window Screenshot")
-![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex2.png "Example Tile Placement Preview UI")
+![](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex1.png?raw=true)|![](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex2.png?raw=true)
+:-------------------------:|:-------------------------:
+Screenshot of *Star Maps* Main Game Window  |  Example of *Star Maps* Tile Picker Preview
 
-[![Watch The Gameplay Demo](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex1.png)](https://www.youtube.com/watch?v=YucwlUQlneI)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=YucwlUQlneI">
+    <img src="https://i.imgur.com/QGSNEj8.png" alt="Watch The Gameplay Demo" width="900" />
+  </a>
+</p>
 
 ## Outside Assets & Tools Used:
 
