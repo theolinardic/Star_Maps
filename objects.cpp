@@ -214,11 +214,6 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
             // Find the center of the objects parent:
             glm::vec3 parent_planet_center = this->parent_planet->get_center();
 
-            // Find the distance along the orbit path it should be based on the time it has existed (keeps track of 
-            // if the game is paused, basically) and the orbit speed of each object:
-            this->position.x = parent_planet_center.x + this->orbit_radius * cos((this->time_exist) * this->orbit_speed);
-            this->position.y = parent_planet_center.y;
-            this->position.z = parent_planet_center.z + this->orbit_radius * sin((this->time_exist) * this->orbit_speed);
 
             if (this->was_placed)
             {
@@ -227,10 +222,43 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
            //      this->position.y = parent_planet_center.y;
              //    this->position.z = parent_planet_center.z + this->ring_parent->orbit_radius * sin((this->ring_parent->time_exist) * this->ring_parent->orbit_speed);
 
-                glm::vec3 newPoint = this->ring_parent->position + normalizedDistanceVector * originalDistance;
 
-                model_matrix = glm::translate(glm::mat4(1.0f), newPoint);
+// Define the original distances from the Sun and between the planets
+// Calculate the vector from the Sun to Planet 1
+                /*
+                glm::vec3 vectorSunToPlanet1 = this->ring_parent->position - glm::vec3(0.0f, 0.0f, 0.0f);
+                glm::vec3 normalizedVectorSunToPlanet1 = glm::normalize(vectorSunToPlanet1);
+
+                // Calculate the vector from Planet 1 to Planet 2
+                glm::vec3 vectorPlanet1ToPlanet2 = this->position - this->ring_parent->position;
+                glm::vec3 normalizedVectorPlanet1ToPlanet2 = glm::normalize(vectorPlanet1ToPlanet2);
+
+                // Calculate the new position of Planet 2 maintaining original distances
+                glm::vec3 newPositionPlanet2 = this->ring_parent->position +
+                    normalizedVectorSunToPlanet1 * this->dis_sun_orb +
+                    normalizedVectorPlanet1ToPlanet2 * this->dis_orb;
+
+                // Set Planet 2's position
+                this->position = newPositionPlanet2;
+                */
+                int currentIndex = 0;
+                int totalPoints = ring_positions[closest_ring].size();
+                glm::vec3 lastUsed = this->position;
+
+                for (int i = 0; i < totalPoints; ++i) {
+                    if (ring_positions[closest_ring][i] == lastUsed) {
+                        currentIndex = (i + 1) % totalPoints; // Move to the next index, wrapping around if needed
+                        break;
+                    }
+                }
+
+                this->position = this->saved_point;
+
+
+                // Set the model matrix for rendering
+                model_matrix = glm::translate(glm::mat4(1.0f), this->position);
                 model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
+
             }
             /*
             if (this->was_placed)
@@ -261,6 +289,12 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
             */
             else
             {
+                // Find the distance along the orbit path it should be based on the time it has existed (keeps track of 
+// if the game is paused, basically) and the orbit speed of each object:
+                this->position.x = parent_planet_center.x + this->orbit_radius * cos((this->time_exist) * this->orbit_speed);
+                this->position.y = parent_planet_center.y;
+                this->position.z = parent_planet_center.z + this->orbit_radius * sin((this->time_exist) * this->orbit_speed);
+
                 model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
                 model_matrix = this->parent_planet->parent_mm * model_matrix;
             }
@@ -269,8 +303,8 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
         }
 
         // Add rotation/spinning for all planets (any object higher than entity id 7 will be spawned after the planets):
-     //   if (this->planet_entity_id < 8)
-   //         model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
+        if (this->planet_entity_id < 8)
+            model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
 
         // If object is a 'preview' object that the player is preparing to place:
         if (this->parent == 0)
@@ -394,6 +428,9 @@ void game_object::render(const glm::vec3& camera_position, const glm::vec3& came
                     this->was_placed = true;
                     this->find_offset = true;
                     this->orbit_radius = this->parent_planet->orbit_radius;
+                    this->dis_sun = glm::distance(closest_point, glm::vec3(0.0f, 0.0f, 0.0f));
+                    this->dis_orb = glm::distance(closest_point, closest_parent_loc);
+                    this->dis_sun_orb = glm::distance(closest_parent_loc, glm::vec3(0.0f, 0.0f, 0.0f));
                 }
                 else
                     this->is_preview = true;

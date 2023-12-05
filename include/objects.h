@@ -55,6 +55,7 @@ public:
     glm::vec3 last_point;
     int las_pos;
     bool should_render;
+    float dis_sun, dis_orb, dis_sun_orb;
 
     game_object(GLFWwindow* window, bool is_npc);
     void load_object(const char* obj_file);

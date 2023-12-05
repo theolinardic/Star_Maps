@@ -580,7 +580,7 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->load_texture("assets/textures/planets/sun.jpg");
 		break;
 	case 1:
-		new_ent->load_texture("assets/textures/planets/earth.jpg");
+		new_ent->load_texture("assets/textures/planets/p5.jpg");
 		break;
 	case 2:
 		new_ent->load_texture("assets/textures/planets/p1.jpg");
