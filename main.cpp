@@ -73,7 +73,7 @@ int main()
 
 		glfwGetFramebufferSize(star_maps_window, &screenWidth, &screenHeight);
 
-		std::string window_head = "Star Maps v0.35: " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight)
+		std::string window_head = "Star Maps v1.00: " + std::to_string(screenWidth) + "x" + std::to_string(screenHeight)
 			+ " - FPS: " + std::to_string(static_cast<int>(fps));
 		glfwSetWindowTitle(star_maps_window, window_head.c_str());
 

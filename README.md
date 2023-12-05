@@ -1,7 +1,7 @@
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/logos/Logo_Idea3.png "Star Maps")
 # A game about building the perfect system.
 ### Version: 1.0
-Created by Theodore Linardic for COP XXXX - Computer Graphics at the University of Central Florida.
+Created by Theodore Linardic for CAP 4720 - Computer Graphics at the University of Central Florida.
 
 Star Maps brings a whole new spin on the City-Builder genre by letting *you* build the next great civilization in space!
 
@@ -9,11 +9,16 @@ Star Maps brings a whole new spin on the City-Builder genre by letting *you* bui
 ## PC Controls
 ![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/control_layout.png "Star Maps Control Layout for PC")
 
+## Screenshots and Video Demonstration
+![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex1.png "Star Maps Main Game Window Screenshot")
+![alt text](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex2.png "Example Tile Placement Preview UI")
+
+[![Watch The Gameplay Demo](https://github.com/theolinardic/Star_Maps/blob/main/assets/other/screenshots/main_game_ex1.png)](https://www.youtube.com/watch?v=YucwlUQlneI)
+
 ## Outside Assets & Tools Used:
 
 Libraries:
 - [OpenGL](https://www.opengl.org/)
-- [irrKlang Audio Engine](https://www.ambiera.com/irrklang/)
 - [GLFW](https://www.glfw.org/)
 - [imgui](https://github.com/ocornut/imgui)
 - [OpenGL Mathematics (GLM)](https://github.com/g-truc/glm)
