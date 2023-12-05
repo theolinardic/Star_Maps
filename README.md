@@ -20,6 +20,13 @@ Screenshot of *Star Maps* Main Game Window  |  Example of *Star Maps* Tile Picke
   </a>
 </p>
 
+<p align="center">
+  <a href="https://drive.google.com/file/d/12R9dVFG4bVpmmIdSvndlIHQLPnQI32fW/view?usp=sharing">
+    <img src="https://github.com/theolinardic/Star_Maps/blob/main/assets/images/other/download_img.png?raw=true" alt="Watch The Gameplay Demo"/>
+  </a>
+</p>
+
+
 ## Outside Assets & Tools Used:
 
 Libraries:
