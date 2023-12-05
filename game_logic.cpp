@@ -18,6 +18,8 @@ star_maps_game::star_maps_game(bool p, GLFWwindow* window, HUD* ui)
 	this->game_ui = ui;
 	this->placing = -1;
 	this->in_menu = true;
+	this->daily_cost = 0;
+	this->daily_cost = 0;
 
 	// Load all these from the file after the user picks a save:
 	this->player_money = 0.00;
@@ -352,6 +354,8 @@ void star_maps_game::update_ingame_clock(float time_to_add, HUD* game_ui)
 		if (this->in_game_hour == 24)
 		{
 			this->sols_passed++;
+			this->player_money += daily_gain;;
+			this->player_money -= daily_cost;
 			this->in_game_hour = 0;
 		}
 	}
@@ -403,6 +407,7 @@ void star_maps_game::update_ingame_clock(float time_to_add, HUD* game_ui)
 	if (ImGui::Button("Clear All Ents"))
 		this->despawn_all_entities();
 }
+
 
 // Function that handles the game speed and rendering of all game objects.
 void star_maps_game::entity_manager(const glm::vec3& camera_position, const glm::vec3& camera_front)
@@ -474,11 +479,91 @@ void star_maps_game::spawn_entity(int type, int texture_id, int parent_in, glm::
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
-		new_ent->size_adjust = 1;
+		new_ent->size_adjust = 20.0f;
 		break;
 	case 4: // System Launcher
 		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
 		new_ent->load_object("assets/objects/stations/system_launcher/system_launcher.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 10.0f;
+		break;
+	case 5: // Housing Tile
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/housing_piece/housing_piece.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 6: // power station
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/power_station/power_station.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 7: // ship store
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/ships_store/ships_store.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 8: // food
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/food_store/food_store.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 10: // galaxy lacunerh
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/galaxy_launcher/galaxy_launcher.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 11: // mh
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/mass_housing_piece/mass_housing_piece.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 12: // mh
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/ship_factory/ship_factory.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 13: // mh
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/weapons_store/weapons_store.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 14: // bank
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/bank/bank.obj");
+		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
+		new_ent->orbit_radius = 15;
+		new_ent->orbit_speed = 0.5f;
+		new_ent->size_adjust = 5.0f;
+		break;
+	case 15: // amusement
+		new_ent->shader = load_shader("shaders/placing_item/vert.glsl", "shaders/placing_item/frag.glsl");
+		new_ent->load_object("assets/objects/stations/amsuement_park/amusement_park.obj");
 		new_ent->orbit_center = glm::vec3(0.0f, 0.0f, 0.0f);
 		new_ent->orbit_radius = 15;
 		new_ent->orbit_speed = 0.5f;
@@ -611,9 +696,10 @@ void star_maps_game::close_game()
 void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& camera_front, float& camera_yaw, float& camera_pitch)
 
 {
+	placing = -1;
 	for (game_object* obj : this->entitiys)
 		if (obj->is_preview)
-			placing = true;
+			placing = 1;
 	if(!placing)
 		game_ui->update_element(0, 0);
 
@@ -655,6 +741,7 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 
 	if (glfwGetMouseButton(this->window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE && last_frame_down == 1)
 	{
+		std::cout << "g" << std::endl;
 		std::cout << placing << std::endl;
 		last_frame_down = 0;
 		double mx, my;
@@ -707,6 +794,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 7);
 				this->current_tool = 0;
+				if (placing == -1)
+				{
+					placing = 5;
+					spawn_entity(5, 7, 0, glm::vec3(100, 100, 60), false);
+				}
 			}
 		}
 		else if (mx > 293 && mx < 357 && my > 950 && my < 1005)
@@ -717,6 +809,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				this->current_tool = 0;
 				game_ui->update_element(0, 9);
+				if (placing == -1)
+				{
+					placing = 5;
+					spawn_entity(6, 7, 0, glm::vec3(100, 100, 60), false);
+				}
 			}
 		}
 		else if (mx > 389 && mx < 444 && my > 950 && my < 1005)
@@ -728,6 +825,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				this->current_tool = 0;
 				game_ui->update_element(0, 11);
 			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(7, 7, 0, glm::vec3(100, 100, 60), false);
+			}
 		}
 		else if (mx > 484 && mx < 540 && my > 950 && my < 1005)
 		{
@@ -737,6 +839,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				this->current_tool = 0;
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 12);
+			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(8, 7, 0, glm::vec3(100, 100, 60), false);
 			}
 		}
 		else if (mx > 580 && mx < 636 && my > 950 && my < 1005)
@@ -748,6 +855,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 15);
 			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(3, 7, 0, glm::vec3(100, 100, 60), false);
+			}
 		}
 		else if (mx > 100 && mx < 155 && my > 1015 && my < 1070)
 		{
@@ -757,6 +869,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				this->current_tool = 0;
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 6);
+			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(10, 7, 0, glm::vec3(100, 100, 60), false);
 			}
 		}
 		else if (mx > 197 && mx < 251 && my > 1015 && my < 1070)
@@ -768,6 +885,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 8);
 			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(11, 7, 0, glm::vec3(100, 100, 60), false);
+			}
 		}
 		else if (mx > 293 && mx < 357 && my > 1015 && my < 1070)
 		{
@@ -777,6 +899,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				this->current_tool = 0;
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 10);
+			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(12, 7, 0, glm::vec3(100, 100, 60), false);
 			}
 		}
 		else if (mx > 389 && mx < 444 && my > 1015 && my < 1070)
@@ -788,6 +915,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 13);
 			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(13, 7, 0, glm::vec3(100, 100, 60), false);
+			}
 		}
 		else if (mx > 484 && mx < 540 && my > 1015 && my < 1070)
 		{
@@ -798,6 +930,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 14);
 			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(14, 7, 0, glm::vec3(100, 100, 60), false);
+			}
 		}
 		else if (mx > 580 && mx < 636 && my > 1015 && my < 1070)
 		{
@@ -807,6 +944,11 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 				this->current_tool = 0;
 				game_ui->update_element(1, 1);
 				game_ui->update_element(0, 16);
+			}
+			if (placing == -1)
+			{
+				placing = 5;
+				spawn_entity(15, 7, 0, glm::vec3(100, 100, 60), false);
 			}
 		}
 		else if (mx > 1145 && mx < 1166 && my >= 0 && my < 25) // pause
@@ -967,7 +1109,8 @@ void star_maps_game::read_player_input(glm::vec3& camera_position, glm::vec3& ca
 			// If the raycast enters the bounding box anywhere, set the bounding box to be visible,
 			// Mainly for testing purposes for now:
 			if (tEnterMax <= tExitMin && tExitMin >= 0.0f)
-				obj->render_bb = true;
+				if (current_tool == 1)
+					obj->should_render = false;
 			else
 				obj->render_bb = false;
 		}

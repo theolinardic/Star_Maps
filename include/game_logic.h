@@ -50,6 +50,8 @@ public:
 	int last_frame_down;
 	bool in_menu;
 	bool spawned_recently;
+	long int daily_cost;
+	long int daily_gain;
 
 	int current_tool, placing;
 

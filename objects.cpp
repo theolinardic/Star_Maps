@@ -15,7 +15,7 @@ game_object::game_object(GLFWwindow* window, bool is_npc)
     this->position = glm::vec3(0.0, 0.0, 0.0);
     this->render_bb = false;
     this->window = window;
-
+    this->should_render = true;
     this->time_to_fly = 30.0f;
     this->is_npc = is_npc;
     this->start_pos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -190,195 +190,272 @@ void game_object::get_rand_pars(std::vector<game_object*> entitiys)
 // Function to render the game object. Will be called in the main game entity manager render loop.
 void game_object::render(const glm::vec3& camera_position, const glm::vec3& camera_front, float game_speed, std::vector<glm::vec3> ring_positions[7], std::vector<game_object*> entitiys)
 {
-    // Initialize debug menu reference:
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::Text("%d %f %f %f", this->planet_entity_id, this->position.x, this->position.y, this->position.z);
-
-    // Update the time the object has existed:
-    this->time_exist += (glfwGetTime() - last_frame_time) * game_speed;
-    this->last_frame_time = glfwGetTime();
-    
-    // Bind VAO and shader for the current object:
-    glBindVertexArray(this->VAO);
-    glUseProgram(this->shader);
-
-    // Initialize the model matrix of changes to be made to the object with the scale adjustment:
-    glm::mat4 model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(this->size_adjust));
-
-    // Every object will orbit around its parent object. (Besides the sun, hence why I start at entity 2) Here is where the 
-    // new position of each object on its orbit path is calculated:
-    if (this->planet_entity_id > 1 && this->parent != 0 && this->is_npc == false)
+    if (this->should_render)
     {
-        // Find the center of the objects parent:
-        glm::vec3 parent_planet_center = this->parent_planet->get_center();
+        // Initialize debug menu reference:
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui::Text("%d %f %f %f", this->planet_entity_id, this->position.x, this->position.y, this->position.z);
 
-        // Find the distance along the orbit path it should be based on the time it has existed (keeps track of 
-        // if the game is paused, basically) and the orbit speed of each object:
-        this->position.x = parent_planet_center.x + this->orbit_radius * cos(this->time_exist * this->orbit_speed);
-        this->position.y = parent_planet_center.y;
-        this->position.z = parent_planet_center.z + this->orbit_radius * sin(this->time_exist * this->orbit_speed);
+        // Update the time the object has existed:
+        this->time_exist += (glfwGetTime() - last_frame_time) * game_speed;
+        this->last_frame_time = glfwGetTime();
 
-        // Apply the translation to the model matrix and then multiply by the model matrix of its parent
-        // so we can achieve accurate sub rotations (i.e. a space station orbiting around a planet that is orbiting the sun):
-        model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
-        model_matrix = this->parent_planet->parent_mm * model_matrix;
-    }
+        // Bind VAO and shader for the current object:
+        glBindVertexArray(this->VAO);
+        glUseProgram(this->shader);
 
-    // Add rotation/spinning for all planets (any object higher than entity id 7 will be spawned after the planets):
-    if (this->planet_entity_id < 8)
-        model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
+        // Initialize the model matrix of changes to be made to the object with the scale adjustment:
+        glm::mat4 model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(this->size_adjust));
 
-    // If object is a 'preview' object that the player is preparing to place:
-    if (this->parent == 0)
-    {
-        // Get mouse position
-        double mouseX, mouseY;
-        glfwGetCursorPos(this->window, &mouseX, &mouseY);
+        // Every object will orbit around its parent object. (Besides the sun, hence why I start at entity 2) Here is where the 
+        // new position of each object on its orbit path is calculated:
+        if (this->planet_entity_id > 1 && this->parent != 0 && this->is_npc == false)
+        {
+            // Find the center of the objects parent:
+            glm::vec3 parent_planet_center = this->parent_planet->get_center();
 
-        // Convert mouse position to world coordinates
-        int screenWidth, screenHeight;
-        glfwGetWindowSize(this->window, &screenWidth, &screenHeight);
-        float normalizedX = (2.0f * mouseX) / screenWidth - 1.0f;
-        float normalizedY = 1.0f - (2.0f * mouseY) / screenHeight;
+            // Find the distance along the orbit path it should be based on the time it has existed (keeps track of 
+            // if the game is paused, basically) and the orbit speed of each object:
+            this->position.x = parent_planet_center.x + this->orbit_radius * cos((this->time_exist) * this->orbit_speed);
+            this->position.y = parent_planet_center.y;
+            this->position.z = parent_planet_center.z + this->orbit_radius * sin((this->time_exist) * this->orbit_speed);
 
-        glm::vec4 ray_clip = glm::vec4(normalizedX, normalizedY, -1.0, 1.0);
-        glm::vec4 ray_eye = glm::inverse(projection_matrix) * ray_clip;
-        ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
-        glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;
-        glm::vec3 ray_direction = glm::normalize(glm::vec3(ray_world));
-        bool ok_place = true;
-        float shortest = 999999999.0f;
-        glm::vec3 closest_point = glm::vec3(0.0f, 0.0f, 0.0f);
-        int closest_ring = -1;
-        int closest_parent_id = -1;
-        glm::vec3 ray_origin = (camera_position + camera_front);
-        for (int i = 0; i < 6; i++) {
-            for (const glm::vec3& vertex : ring_positions[i]) {
-                // Calculate the intersection point of the ray with the y = 0 plane
-                float t = -ray_origin.y / ray_direction.y;
-                glm::vec3 intersection_point = ray_origin + t * ray_direction;
+            if (this->was_placed)
+            {
+                // parent_planet_center = this->ring_parent->parent_planet->get_center();
+           //      this->position.x = parent_planet_center.x + this->ring_parent->orbit_radius * cos((this->ring_parent->time_exist) * this->ring_parent->orbit_speed);
+           //      this->position.y = parent_planet_center.y;
+             //    this->position.z = parent_planet_center.z + this->ring_parent->orbit_radius * sin((this->ring_parent->time_exist) * this->ring_parent->orbit_speed);
 
-                // Calculate the distance between the intersection point and the vertex on the ring:
-                float distance = glm::distance(intersection_point, vertex);
+                glm::vec3 newPoint = this->ring_parent->position + normalizedDistanceVector * originalDistance;
 
-                // If this point is closer, update the closest point:
-                if (distance < shortest) {
-                    shortest = distance;
-                    closest_point = vertex;
-                    closest_ring = i;
+                model_matrix = glm::translate(glm::mat4(1.0f), newPoint);
+                model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
+            }
+            /*
+            if (this->was_placed)
+            {
+                float closest_dist = 99999999999.0f;
+                glm::vec3 closest_point = this->ring_parent->position;
+                bool found_p = false;
+                int cx = 0;
+                int px = -1;
+                for (glm::vec3 point : ring_positions[closest_ring]) {
+                    float new_dist = glm::distance(this->ring_parent->position, point);
+                    if (glm::abs(new_dist) < 5)
+                        px = cx;
+
+                    if (glm::abs(originalDistance - new_dist) < closest_dist && cx > px && px > 0)
+                    {
+                        closest_dist = glm::abs(originalDistance - new_dist);
+                        closest_point = point;
+                        printf("%d %d\n", cx, px);
+                    }
+                    cx++;
+                }
+                if (las_pos >= ring_positions[closest_ring].size()) {
+                    las_pos = 0;
+                }
+
+            }
+            */
+            else
+            {
+                model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
+                model_matrix = this->parent_planet->parent_mm * model_matrix;
+            }
+            // Apply the translation to the model matrix and then multiply by the model matrix of its parent
+            // so we can achieve accurate sub rotations (i.e. a space station orbiting around a planet that is orbiting the sun):
+        }
+
+        // Add rotation/spinning for all planets (any object higher than entity id 7 will be spawned after the planets):
+     //   if (this->planet_entity_id < 8)
+   //         model_matrix = glm::rotate(glm::mat4(1.0f), this->time_exist * 0.05f, glm::vec3(0.0f, 1.0f, 0.0f)) * model_matrix;
+
+        // If object is a 'preview' object that the player is preparing to place:
+        if (this->parent == 0)
+        {
+            // Get mouse position
+            double mouseX, mouseY;
+            glfwGetCursorPos(this->window, &mouseX, &mouseY);
+
+            // Convert mouse position to world coordinates
+            int screenWidth, screenHeight;
+            glfwGetWindowSize(this->window, &screenWidth, &screenHeight);
+            float normalizedX = (2.0f * mouseX) / screenWidth - 1.0f;
+            float normalizedY = 1.0f - (2.0f * mouseY) / screenHeight;
+
+            glm::vec4 ray_clip = glm::vec4(normalizedX, normalizedY, -1.0, 1.0);
+            glm::vec4 ray_eye = glm::inverse(projection_matrix) * ray_clip;
+            ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
+            glm::vec4 ray_world = glm::inverse(view_matrix) * ray_eye;
+            glm::vec3 ray_direction = glm::normalize(glm::vec3(ray_world));
+            bool ok_place = true;
+            float shortest = 999999999.0f;
+            glm::vec3 closest_point = glm::vec3(0.0f, 0.0f, 0.0f);
+            closest_ring = -1;
+            glm::vec3 closest_parent_loc = glm::vec3(0.0f, 0.0f, 0.0f);
+            glm::vec3 ray_origin = (camera_position + camera_front);
+            for (int i = 0; i < 6; i++) {
+                for (const glm::vec3& vertex : ring_positions[i]) {
+                    // Calculate the intersection point of the ray with the y = 0 plane
+                    float t = -ray_origin.y / ray_direction.y;
+                    glm::vec3 intersection_point = ray_origin + t * ray_direction;
+
+                    // Calculate the distance between the intersection point and the vertex on the ring:
+                    float distance = glm::distance(intersection_point, vertex);
+
+                    // If this point is closer, update the closest point:
+                    if (distance < shortest) {
+                        shortest = distance;
+                        closest_point = vertex;
+                        closest_ring = i;
+                        orig_dis = distance;
+                    }
                 }
             }
-        }
-        // check for collision with planets and move to orbit planet instead 
-        for (game_object* obj : entitiys)
-        {
-            // Simple Collision detection with planet on the closest ring
-            if (obj->planet_entity_id == closest_ring + 2)
+            // check for collision with planets and move to orbit planet instead 
+            for (game_object* obj : entitiys)
             {
-                closest_parent_id = obj->planet_entity_id;
-                float dis = glm::distance(closest_point, obj->position);
-                if (dis < 26.0f)  // Planet 1 
+                // Simple Collision detection with planet on the closest ring
+                if (obj->planet_entity_id == closest_ring + 2)
                 {
-                    ok_place = false;
-                    closest_point = obj->position;
-                    closest_point.y = 80.0f;
+                    closest_parent_id = obj->planet_entity_id;
+                    closest_parent_loc = obj->position;
+                    ring_parent = obj;
+                    this->parent_planet = ring_parent;
+                    float dis = glm::distance(closest_point, obj->position);
+                    orig_dis = dis;
+                    if (dis < 26.0f)  // Planet 1 
+                    {
+                        ok_place = false;
+                        closest_point = obj->position;
+                        closest_point.y = 80.0f;
+                    }
+                    else
+                        ok_place = true;
+                }
+            }
+
+            // if objects parent is 0 but preview has been turned off, check for item placement
+            if (this->is_preview == false && this->parent == 0)
+            {
+                if (ok_place)
+                {
+                    switch (closest_ring)
+                    {
+                    case 0:
+                        this->orbit_radius = 100;
+                        break;
+                    case 1:
+                        this->orbit_radius = 200;
+                        break;
+                    case 2:
+                        this->orbit_radius = 300;
+                        break;
+                    case 3:
+                        this->orbit_radius = 400;
+                        break;
+                    case 4:
+                        this->orbit_radius = 500;
+                        break;
+                    case 5:
+                        this->orbit_radius = 600;
+                        break;
+                    }
+                    this->parent = closest_parent_id;
+                    // this->size_adjust = 0.2f;
+
+                    for (game_object* obj : entitiys)
+                        if (obj->planet_entity_id == 1)
+                            this->parent_planet = obj;
+                    this->parent = this->parent_planet->planet_entity_id;
+                    this->orbit_speed = this->parent_planet->orbit_speed;
+
+                 //   this->distX = glm::distance(closest_point, closest_parent_loc);
+
+                    this->distX = std::abs(closest_point.x - closest_parent_loc.x);
+                    this->distY = std::abs(closest_point.y - closest_parent_loc.y);
+                    this->distZ = std::abs(closest_point.z - closest_parent_loc.z);
+                    originalDistance = glm::distance(closest_point, closest_parent_loc);
+
+                    // Calculate the vector between the points and normalize it
+                    distanceVector = closest_point - closest_parent_loc;
+                    normalizedDistanceVector = glm::normalize(distanceVector);
+
+                    // Get the new position by scaling the normalized vector by the original distance
+                    newClosestPoint = closest_parent_loc + normalizedDistanceVector * originalDistance;
+
+                    // Use this new position for placement
+                    closest_point = newClosestPoint;
+                    saved_point = closest_point;
+
+
+                    this->was_placed = true;
+                    this->find_offset = true;
+                    this->orbit_radius = this->parent_planet->orbit_radius;
                 }
                 else
-                    ok_place = true;
+                    this->is_preview = true;
             }
+            // change if obj should be red or not if invalid placement location:
+            glUniform1i(glGetUniformLocation(this->shader, "ok_place"), ok_place);
+
+            // Update the position of the preview object with the new location:
+            this->position = closest_point;
+            this->last_point = closest_point;
+            model_matrix = glm::translate(glm::mat4(1.0f), this->position);
+            model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
         }
 
-        // if objects parent is 0 but preview has been turned off, check for item placement
-        if (this->is_preview == false && this->parent == 0)
+        // NPC spawns:
+        if (this->is_npc)
         {
-            if (ok_place)
+            this->get_rand_pars(entitiys);
+            if (time_exist < time_to_fly)
             {
-                switch (closest_ring)
-                {
-                case 0:
-                    this->orbit_radius = 100;
-                    break;
-                case 1:
-                    this->orbit_radius = 200;
-                    break;
-                case 2:
-                    this->orbit_radius = 300;
-                    break;
-                case 3:
-                    this->orbit_radius = 400;
-                    break;
-                case 4:
-                    this->orbit_radius = 500;
-                    break;
-                case 5:
-                    this->orbit_radius = 600;
-                    break;
-                }
-                this->parent = closest_parent_id;
-                this->size_adjust = 0.2f;
-                for (game_object* obj : entitiys)
-                    if (obj->planet_entity_id == 1)
-                        this->parent_planet = obj;
-                this->orbit_speed = this->parent_planet->orbit_speed;
-            }   
-            else
-                this->is_preview = true;
+                glm::vec3 direction = end_pos - this->position;
+                float t = glm::clamp(time_exist / time_to_fly, 0.0f, 1.0f);
+                this->position = glm::mix(start_pos, end_pos, t);
+
+                float yaw = atan2(-direction.z, direction.x);
+                float pitch = asin(direction.y / glm::length(direction));
+
+                model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
+                model_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                model_matrix = glm::rotate(model_matrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
+                model_matrix = glm::rotate(model_matrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+            }
+            // add despawn for these
         }
-        // change if obj should be red or not if invalid placement location:
-        glUniform1i(glGetUniformLocation(this->shader, "ok_place"),ok_place);
 
-        // Update the position of the preview object with the new location:
-        this->position = closest_point;
-        model_matrix = glm::translate(glm::mat4(1.0f), this->position);
-        model_matrix = glm::scale(model_matrix, glm::vec3(this->size_adjust));
+
+        float fov = 45.0f;
+        glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 projection_matrix = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+
+        // Pass matrices to the objects shader:
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
+        glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
+
+        // Load the objects texture and draw the object:
+        glBindTexture(GL_TEXTURE_2D, this->textureID);
+        glDrawElements(GL_TRIANGLES, this->indices_count, GL_UNSIGNED_INT, 0);
+
+        // Update references of the game object so that sub orbiting objects can find their positions correctly:
+        this->parent_mm = model_matrix;
+        this->view_matrix = view_matrix;
+        this->projection_matrix = projection_matrix;
+        this->model_matrix = model_matrix;
+        this->position = model_matrix[3];
+
+        // Render the objects bounding box if needed:
+        if (this->render_bb)
+            this->render_bounding_box();
+
+        glUseProgram(0);
     }
-
-    // NPC spawns:
-    if (this->is_npc)
-    {
-        this->get_rand_pars(entitiys);
-        if (time_exist < time_to_fly)
-        { 
-            glm::vec3 direction = end_pos - this->position;
-            float t = glm::clamp(time_exist / time_to_fly, 0.0f, 1.0f);
-            this->position = glm::mix(start_pos, end_pos, t);
-
-            float yaw = atan2(-direction.z, direction.x);
-            float pitch = asin(direction.y / glm::length(direction));
-
-            model_matrix = glm::translate(model_matrix, glm::vec3(this->position.x, this->position.y, this->position.z));
-            model_matrix = glm::rotate(model_matrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model_matrix = glm::rotate(model_matrix, yaw, glm::vec3(0.0f, 1.0f, 0.0f));
-            model_matrix = glm::rotate(model_matrix, pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-        }
-        // add despawn for these
-    }
-    // Find the view matrix and projection with the passed in camera position and camera front references:
-    float fov = 45.0f;
-    glm::mat4 view_matrix = glm::lookAt(camera_position, camera_position + camera_front, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection_matrix = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
-
-    // Pass matrices to the objects shader:
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
-    glUniformMatrix4fv(glGetUniformLocation(this->shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
-
-    // Load the objects texture and draw the object:
-    glBindTexture(GL_TEXTURE_2D, this->textureID);
-    glDrawElements(GL_TRIANGLES, this->indices_count, GL_UNSIGNED_INT, 0);
-
-    // Update references of the game object so that sub orbiting objects can find their positions correctly:
-    this->parent_mm = model_matrix;
-    this->view_matrix = view_matrix;
-    this->projection_matrix = projection_matrix;
-    this->model_matrix = model_matrix;
-    this->position = model_matrix[3];
-
-    // Render the objects bounding box if needed:
-    if (this->render_bb)
-        this->render_bounding_box();
-
-    glUseProgram(0);
 }
 
 // Function to render the bounding box for a game object.

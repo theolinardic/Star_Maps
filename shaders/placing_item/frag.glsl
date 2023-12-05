@@ -29,9 +29,16 @@ void main() {
         texColor.g -= 0.25;
         texColor.b -= 0.25;
     }
+
+    else
+    {
+        texColor.r = 1.0;
+        texColor.g = 1.0;
+        texColor.b = 1.0;
+    }
     
     // Apply transparency
-    texColor.a *= 0.5;
+  //  texColor.a *= 0.5;
 
     fragColor = texColor;
 }

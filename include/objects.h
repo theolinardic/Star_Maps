@@ -29,12 +29,32 @@ public:
     GLuint VAO, VBO, EBO, textureID, shader;
     GLFWwindow* window;
 
+    bool was_placed;
+    int closest_parent_id = -1;
+    game_object* ring_parent;
+    float offset;
+    glm::vec3 offset_vector;
+   
+    float originalDistance;
+    glm::vec3 distanceVector;
+    glm::vec3 normalizedDistanceVector;
+    glm::vec3 newClosestPoint;
+    glm::vec3 saved_point;
+
+    int closest_ring = -1;
+    float distX, distY, distZ, orig_dis;
+
     bool is_npc;
     float time_to_fly;
     glm::vec3 start_pos = glm::vec3(0.0f,0.0f,0.0f);
     glm::vec3 end_pos;
     int start_par = -1;
     int end_par = -1;
+    float offset_o = 0.0f;
+    bool find_offset = false;
+    glm::vec3 last_point;
+    int las_pos;
+    bool should_render;
 
     game_object(GLFWwindow* window, bool is_npc);
     void load_object(const char* obj_file);
