@@ -15,7 +15,7 @@ Star Maps brings a whole new spin on the City-Builder genre by letting *you* bui
 Screenshot of *Star Maps* Main Game Window  |  Example of *Star Maps* Tile Picker Preview
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=YucwlUQlneI">
+  <a href="https://www.youtube.com/watch?v=w7bCFLtTDSU">
     <img src="https://i.imgur.com/QGSNEj8.png" alt="Watch The Gameplay Demo" width="900" />
   </a>
 </p>
